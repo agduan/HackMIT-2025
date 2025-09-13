@@ -39,11 +39,12 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
 
    # Install client dependencies
    cd client
-   npm install
+   npm install socket.io-client
 
    # Install server dependencies
    cd ../server
-   npm install
+   npm install socket.io-server
+   npm install @google-cloud/speech
    ```
 
 3. **Set up environment variables**
@@ -112,10 +113,7 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
 - **Good**: Few long pauses (effective use of silence)
 - **Needs Improvement**: Many long pauses (may indicate hesitation)
 
-### Sentiment
-- **Positive**: Optimistic tone with solution-focused language
-- **Neutral**: Balanced presentation
-- **Negative**: Problem-focused, consider highlighting solutions
+### AI-Powered Feedback
 
 ## 🛠️ Tech Stack
 
