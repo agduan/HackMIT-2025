@@ -12,7 +12,7 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState(null);
   const [videoStream, setVideoStream] = useState(null);
-  const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(true);
+  const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(false);
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -50,11 +50,11 @@ function App() {
 
     // fetch private JSON from Vercel API
     fetch("/api/get-json")
-    .then(res => res.json())
-    .then(data => {
-      console.log("Private JSON from server:", data);
-    })
-    .catch(err => console.error(err));
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Private JSON from server:", data);
+      })
+      .catch((err) => console.error(err));
 
     return () => {
       socket.off("transcript");

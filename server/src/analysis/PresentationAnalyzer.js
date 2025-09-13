@@ -26,7 +26,7 @@ class PresentationAnalyzer {
 2. Communication effectiveness
 3. Areas for improvement
 4. Strengths to maintain
-Provide specific, actionable advice in 2-3 sentences.`;
+Provide specific, actionable advice in 2-3 sentences. `;
 
   // Common English stop words for keyword extraction.
   static STOP_WORDS = new Set([
@@ -223,7 +223,7 @@ Provide specific, actionable advice in 2-3 sentences.`;
               },
             ],
             max_tokens: 300,
-            temperature: 0.7,
+            temperature: 0.3,
           }),
         },
       );
