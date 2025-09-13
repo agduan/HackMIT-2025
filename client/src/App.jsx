@@ -194,8 +194,10 @@ function App() {
   return (
     <div className="app-container">
       <header>
-        <h1>Socrates - Live Presentation Coach</h1>
-        <p>Get real-time feedback on your presentation skills</p>
+        <h1 style={{ fontFamily: 'Georgia, Times New Roman, serif', fontStyle: 'italic', fontWeight: 300, fontSize: '3em', letterSpacing: '0.02em' }}>Ok, Socrates</h1>
+        <div style={{ fontSize: '1em', color: '#888', marginTop: '-0.5em', fontFamily: 'SF Pro, Inter, Arial, sans-serif' }}>
+          Your personalized coach for real-time presentation feedback
+        </div>
       </header>
 
       {error && (

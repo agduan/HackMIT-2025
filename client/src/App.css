@@ -7,9 +7,9 @@
 
 body {
     font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-        sans-serif;
+           "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+           "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+           sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: #ffff;
@@ -68,22 +68,22 @@ header p {
 }
 
 .control-btn {
-    padding: 15px 30px;
+    padding: 14px 32px;
     border: none;
-    border-radius: 50px;
+    border-radius: 12px;
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    min-width: 200px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    min-width: 180px;
 }
 
 .start-btn {
     background: linear-gradient(45deg, #38b73d, #21ab43);
     color: white;
     border: 1px solid #ccc;       /* thin gray border */
-    border-radius: 30px;
+    border-radius: 12px;
 }
 
 .start-btn:hover:not(.disabled) {
@@ -94,6 +94,7 @@ header p {
 .stop-btn {
     background: linear-gradient(45deg, #f44336, #d32f2f);
     color: white;
+    border-radius: 12px;
 }
 
 .stop-btn:hover:not(.disabled) {
