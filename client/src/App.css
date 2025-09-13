@@ -155,7 +155,7 @@ header p {
 }
 
 .toggle-input:checked + .toggle-slider {
-    background-color: #2196F3;
+    background-color: #667eea;
 }
 
 .toggle-input:checked + .toggle-slider:before {
@@ -239,8 +239,8 @@ header p {
 }
 
 .video-section h2,
-.transcript-section h2,
-.feedback-section h2 {
+    .transcript-section h2,
+    .feedback-section h2 {
     margin-bottom: 20px;
     color: #333;
     font-size: 1.5rem;
@@ -406,7 +406,7 @@ header p {
     margin-bottom: 10px;
     padding: 15px;
     border-radius: 8px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #2196F3;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     line-height: 1.5;
 }
