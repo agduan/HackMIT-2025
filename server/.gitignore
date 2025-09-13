@@ -1,7 +1,7 @@
 # --- SECRETS ---
 # Ignore environment variables and cloud credentials
-.env
 fundamental-run-472018-j4-f9e30ffa6932.json
+openai-key.txt
 
 
 # Logs
@@ -33,4 +33,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-

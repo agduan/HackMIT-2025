@@ -4,6 +4,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const speech = require("@google-cloud/speech");
 const { PresentationAnalyzer } = require("./analysis/PresentationAnalyzer");
+const { getOpenAIApiKey } = require("./utils/apiKey");
 
 const app = express();
 const server = http.createServer(app);
@@ -87,7 +88,7 @@ io.on("connection", (socket) => {
                     );
                     analyzer
                       .runFullAnalysis({
-                        apiKey: process.env.OPENAI_API_KEY,
+                        apiKey: getOpenAIApiKey(),
                       })
                       .then((liveReport) => {
                         socket.emit("live-feedback", liveReport);
@@ -164,7 +165,7 @@ io.on("connection", (socket) => {
       try {
         const analyzer = new PresentationAnalyzer(socket._transcript);
         const finalReport = await analyzer.runFullAnalysis({
-          apiKey: process.env.OPENAI_API_KEY,
+          apiKey: getOpenAIApiKey(),
         });
         // The 'final-analysis' event signals the definitive end report
         socket.emit("final-analysis", finalReport);
