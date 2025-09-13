@@ -34,27 +34,27 @@ A real-time presentation analysis web app that provides instant feedback on spea
    ```bash
    # Install root dependencies
    npm install
-   
+
    # Install client dependencies
    cd client
    npm install
-   
+
    # Install server dependencies
    cd ../server
    npm install
    ```
 
 3. **Set up environment variables**
-   
+
    Create a `.env` file in the root directory:
    ```env
    # Wispr API Configuration
    WISPR_ENDPOINT=https://api.wispr.ai/v1/transcribe
    WISPR_KEY=your_wispr_api_key_here
-   
+
    # Server Configuration
    PORT=4000
-   
+
    # Client Configuration
    VITE_SOCKET_URL=http://localhost:4000
    ```

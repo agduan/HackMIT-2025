@@ -15,7 +15,7 @@ function App() {
 
   useEffect(() => {
     socket.on("transcript-chunk", (words) => {
-      const newText = words.map(word => word.word).join(" ");
+      const newText = words.map((word) => word.word).join(" ");
       setTranscript((prev) => prev + " " + newText);
     });
 
@@ -47,9 +47,25 @@ function App() {
       setTranscript("");
       setLiveFeedback(null);
       setFinalAnalysis(null);
-      
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+
+      // Check if MediaRecorder is supported and get supported MIME types
+      let mimeType = "audio/webm";
+      if (!MediaRecorder.isTypeSupported("audio/webm")) {
+        if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+          mimeType = "audio/ogg";
+        } else {
+          mimeType = "";
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(
+        stream,
+        mimeType ? { mimeType } : {},
+      );
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.addEventListener("dataavailable", async (e) => {
@@ -58,19 +74,41 @@ function App() {
         socket.emit("audio-chunk", arrayBuffer);
       });
 
+      mediaRecorder.addEventListener("start", () => {
+        console.log("MediaRecorder started successfully");
+        setIsRecording(true);
+      });
+
+      mediaRecorder.addEventListener("error", (e) => {
+        console.error("MediaRecorder error:", e);
+        setError("Recording error occurred. Please try again.");
+        setIsRecording(false);
+      });
+
       mediaRecorder.start(250); // emit every 250ms
-      setIsRecording(true);
     } catch (err) {
       setError("Failed to access microphone. Please check permissions.");
       console.error("Error starting recording:", err);
+      setIsRecording(false);
     }
   };
 
   const stopRecording = () => {
     const mr = mediaRecorderRef.current;
-    if (mr) {
+    if (mr && mr.state === "recording") {
       mr.stop();
+
+      // Stop all tracks in the stream to release the microphone
+      const stream = mr.stream;
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+
       socket.emit("end-stream");
+      console.log("Recording stopped");
+    } else {
+      console.log("MediaRecorder not recording or not available");
+      setIsRecording(false);
     }
   };
 
@@ -84,7 +122,7 @@ function App() {
 
   const renderMetrics = (data) => {
     if (!data) return null;
-    
+
     return (
       <div className="metrics-grid">
         <MetricCard
@@ -107,7 +145,7 @@ function App() {
         />
         <MetricCard
           title="Sentiment"
-          value={data.sentiment?.score || 'neutral'}
+          value={data.sentiment?.score || "neutral"}
           feedback={data.sentiment?.feedback}
           score={data.sentiment?.score}
         />
@@ -129,17 +167,17 @@ function App() {
       )}
 
       <div className="controls">
-        <button 
-          onClick={startRecording} 
+        <button
+          onClick={startRecording}
           disabled={isRecording}
-          className={`control-btn start-btn ${isRecording ? 'disabled' : ''}`}
+          className={`control-btn start-btn ${isRecording ? "disabled" : ""}`}
         >
-          {isRecording ? '🔴 Recording...' : '▶️ Start Presentation'}
+          {isRecording ? "🔴 Recording..." : "▶️ Start Presentation"}
         </button>
-        <button 
-          onClick={stopRecording} 
+        <button
+          onClick={stopRecording}
           disabled={!isRecording}
-          className={`control-btn stop-btn ${!isRecording ? 'disabled' : ''}`}
+          className={`control-btn stop-btn ${!isRecording ? "disabled" : ""}`}
         >
           ⏹️ Stop & Analyze
         </button>
@@ -168,22 +206,25 @@ function App() {
               {renderMetrics(liveFeedback)}
             </div>
           )}
-          
+
           {finalAnalysis && (
             <div className="final-analysis">
               <h3>✅ Final Analysis</h3>
               {renderMetrics(finalAnalysis)}
-              
-              {finalAnalysis.followUpQuestions && finalAnalysis.followUpQuestions.length > 0 && (
-                <div className="followup-questions">
-                  <h4>💭 Suggested Follow-up Questions</h4>
-                  <ul>
-                    {finalAnalysis.followUpQuestions.map((question, index) => (
-                      <li key={index}>{question}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+
+              {finalAnalysis.followUpQuestions &&
+                finalAnalysis.followUpQuestions.length > 0 && (
+                  <div className="followup-questions">
+                    <h4>💭 Suggested Follow-up Questions</h4>
+                    <ul>
+                      {finalAnalysis.followUpQuestions.map(
+                        (question, index) => (
+                          <li key={index}>{question}</li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                )}
             </div>
           )}
         </section>
