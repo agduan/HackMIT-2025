@@ -1,4 +1,7 @@
 # 🎤 Socrates - Live Presentation Coach
+Socrates is a presentation analyzer and note taker web app. It will listen to you give your presentation, take notes, and give feedback -- both as followup questions and how to improve your presenting skills.
+
+This is for the education track at HackMIT 2025 and the Wispr Sponsor Challenge:
 
 A real-time presentation analysis web app that provides instant feedback on speaking pace, filler words, pauses, and sentiment during live presentations. Built for the Wispr Challenge at HackMIT 2025.
 
