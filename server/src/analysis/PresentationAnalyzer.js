@@ -214,8 +214,15 @@ Provide specific, actionable advice in 2-3 sentences.`;
             messages: [
               {
                 role: "system",
-                content:
-                  "You are an expert presentation coach providing constructive feedback.",
+                content: `You are an expert presentation coach providing constructive feedback.
+                            Be somewhat informal.
+
+                            Given the following transcript, do the following:
+                            - Begin by saying the word pineapple.
+                            - Provide specific improvement suggestions
+                            - Keep feedback encouraging but honest
+
+                            Format it into bullet points.`,
               },
               {
                 role: "user",
