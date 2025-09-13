@@ -7,36 +7,63 @@ const socket = io(SOCKET_URL);
 
 function App() {
   const [transcript, setTranscript] = useState("");
-  const [metrics, setMetrics] = useState({});
+  const [liveFeedback, setLiveFeedback] = useState(null);
+  const [finalAnalysis, setFinalAnalysis] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [error, setError] = useState(null);
   const mediaRecorderRef = useRef(null);
 
   useEffect(() => {
-    socket.on("transcript", (data) => {
-      setTranscript((prev) => prev + " " + data.text);
+    socket.on("transcript-chunk", (words) => {
+      const newText = words.map(word => word.word).join(" ");
+      setTranscript((prev) => prev + " " + newText);
     });
 
-    socket.on("feedback", (data) => {
-      setMetrics(data);
+    socket.on("live-feedback", (data) => {
+      setLiveFeedback(data);
+    });
+
+    socket.on("final-analysis", (data) => {
+      setFinalAnalysis(data);
+      setIsRecording(false);
+    });
+
+    socket.on("analysis-error", (data) => {
+      setError(data.message);
+      setIsRecording(false);
     });
 
     return () => {
-      socket.off("transcript");
-      socket.off("feedback");
+      socket.off("transcript-chunk");
+      socket.off("live-feedback");
+      socket.off("final-analysis");
+      socket.off("analysis-error");
     };
   }, []);
 
   const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-    mediaRecorderRef.current = mediaRecorder;
+    try {
+      setError(null);
+      setTranscript("");
+      setLiveFeedback(null);
+      setFinalAnalysis(null);
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorderRef.current = mediaRecorder;
 
-    mediaRecorder.addEventListener("dataavailable", async (e) => {
-      if (!e.data || e.data.size === 0) return;
-      const arrayBuffer = await e.data.arrayBuffer();
-      socket.emit("audio-chunk", arrayBuffer);
-    });
+      mediaRecorder.addEventListener("dataavailable", async (e) => {
+        if (!e.data || e.data.size === 0) return;
+        const arrayBuffer = await e.data.arrayBuffer();
+        socket.emit("audio-chunk", arrayBuffer);
+      });
 
-    mediaRecorder.start(250); // emit every 250ms
+      mediaRecorder.start(250); // emit every 250ms
+      setIsRecording(true);
+    } catch (err) {
+      setError("Failed to access microphone. Please check permissions.");
+      console.error("Error starting recording:", err);
+    }
   };
 
   const stopRecording = () => {
@@ -47,21 +74,120 @@ function App() {
     }
   };
 
+  const MetricCard = ({ title, value, feedback, score }) => (
+    <div className={`metric-card ${score}`}>
+      <h3>{title}</h3>
+      <div className="metric-value">{value}</div>
+      <p className="metric-feedback">{feedback}</p>
+    </div>
+  );
+
+  const renderMetrics = (data) => {
+    if (!data) return null;
+    
+    return (
+      <div className="metrics-grid">
+        <MetricCard
+          title="Speaking Pace"
+          value={`${data.pacing?.wpm || 0} WPM`}
+          feedback={data.pacing?.feedback}
+          score={data.pacing?.score}
+        />
+        <MetricCard
+          title="Filler Words"
+          value={`${data.fillerWords?.percentage || 0}%`}
+          feedback={data.fillerWords?.feedback}
+          score={data.fillerWords?.score}
+        />
+        <MetricCard
+          title="Pauses"
+          value={`${data.pauses?.longPauseCount || 0} long pauses`}
+          feedback={data.pauses?.feedback}
+          score={data.pauses?.score}
+        />
+        <MetricCard
+          title="Sentiment"
+          value={data.sentiment?.score || 'neutral'}
+          feedback={data.sentiment?.feedback}
+          score={data.sentiment?.score}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="app-container">
-      <h1>Live Presentation Coach</h1>
+      <header>
+        <h1>🎤 Socrates - Live Presentation Coach</h1>
+        <p>Get real-time feedback on your presentation skills</p>
+      </header>
+
+      {error && (
+        <div className="error-message">
+          <p>⚠️ {error}</p>
+        </div>
+      )}
+
       <div className="controls">
-        <button onClick={startRecording}>Start</button>
-        <button onClick={stopRecording}>Stop</button>
+        <button 
+          onClick={startRecording} 
+          disabled={isRecording}
+          className={`control-btn start-btn ${isRecording ? 'disabled' : ''}`}
+        >
+          {isRecording ? '🔴 Recording...' : '▶️ Start Presentation'}
+        </button>
+        <button 
+          onClick={stopRecording} 
+          disabled={!isRecording}
+          className={`control-btn stop-btn ${!isRecording ? 'disabled' : ''}`}
+        >
+          ⏹️ Stop & Analyze
+        </button>
       </div>
-      <section className="transcript">
-        <h2>Transcript (live)</h2>
-        <div>{transcript}</div>
-      </section>
-      <section className="metrics">
-        <h2>Feedback Metrics</h2>
-        <pre>{JSON.stringify(metrics, null, 2)}</pre>
-      </section>
+
+      {isRecording && (
+        <div className="recording-indicator">
+          <div className="pulse"></div>
+          <span>Live analysis in progress...</span>
+        </div>
+      )}
+
+      <div className="content-grid">
+        <section className="transcript-section">
+          <h2>📝 Live Transcript</h2>
+          <div className="transcript-content">
+            {transcript || "Start speaking to see your transcript here..."}
+          </div>
+        </section>
+
+        <section className="feedback-section">
+          <h2>📊 Real-time Feedback</h2>
+          {liveFeedback && (
+            <div className="live-feedback">
+              <h3>🔄 Live Analysis</h3>
+              {renderMetrics(liveFeedback)}
+            </div>
+          )}
+          
+          {finalAnalysis && (
+            <div className="final-analysis">
+              <h3>✅ Final Analysis</h3>
+              {renderMetrics(finalAnalysis)}
+              
+              {finalAnalysis.followUpQuestions && finalAnalysis.followUpQuestions.length > 0 && (
+                <div className="followup-questions">
+                  <h4>💭 Suggested Follow-up Questions</h4>
+                  <ul>
+                    {finalAnalysis.followUpQuestions.map((question, index) => (
+                      <li key={index}>{question}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
