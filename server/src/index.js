@@ -18,6 +18,44 @@ const speechClient = new speech.SpeechClient({
 // --- Configuration for Live Feedback ---
 const LIVE_FEEDBACK_INTERVAL_MS = 5000; // Send feedback every 5 seconds
 
+// Different system prompts for different analysis types
+function getCustomPromptForAnalysisType(analysisType) {
+  const prompts = {
+    general: `Analyze this presentation transcript and provide constructive feedback. Focus on:
+1. Content clarity and structure
+2. Communication effectiveness
+3. Areas for improvement
+4. Strengths to maintain
+Provide specific, actionable advice in 2-3 sentences.`,
+
+    teaching: `Analyze this technical presentation transcript with focus on:
+1. Technical accuracy and depth of explanation
+2. Use of appropriate technical terminology
+3. Clarity in explaining complex concepts
+4. Logical flow of technical information
+5. Accessibility to the target audience
+Provide specific technical communication advice in 2-3 sentences.`,
+
+    interview: `Analyze this business presentation transcript focusing on:
+1. Value proposition clarity
+2. Persuasiveness and impact
+3. Professional communication style
+4. Market understanding demonstration
+5. Call-to-action effectiveness
+Provide business-focused feedback and improvement suggestions in 2-3 sentences.`,
+
+    academic: `Analyze this academic presentation transcript with emphasis on:
+1. Research methodology and evidence presentation
+2. Academic rigor and scholarly communication
+3. Logical argument structure
+4. Citation and source integration
+5. Contribution to knowledge in the field
+Provide academic presentation improvement advice in 2-3 sentences.`,
+  };
+
+  return prompts[analysisType] || prompts.general;
+}
+
 // Speech recognition configuration
 const speechConfig = {
   encoding: "WEBM_OPUS",
@@ -35,6 +73,8 @@ io.on("connection", (socket) => {
   socket._transcript = [];
   socket._lastFeedbackTimestamp = Date.now();
   socket._recognizeStream = null;
+  socket._isStreamActive = false;
+  socket._analysisType = "general"; // Default analysis type
 
   // Start streaming recognition when client connects
   const startRecognitionStream = () => {
@@ -89,6 +129,9 @@ io.on("connection", (socket) => {
                     analyzer
                       .runFullAnalysis({
                         apiKey: getOpenAIApiKey(),
+                        customPrompt: getCustomPromptForAnalysisType(
+                          socket._analysisType,
+                        ),
                       })
                       .then((liveReport) => {
                         socket.emit("live-feedback", liveReport);
@@ -139,6 +182,15 @@ io.on("connection", (socket) => {
   // Start the recognition stream
   startRecognitionStream();
 
+  // Handle analysis type selection
+  socket.on("set-analysis-type", (data) => {
+    console.log(`Received analysis type change:`, data);
+    socket._analysisType = data.analysisType || "general";
+    console.log(
+      `Analysis type set to: ${socket._analysisType} for socket: ${socket.id}`,
+    );
+  });
+
   socket.on("audio-chunk", async (arrayBuffer) => {
     if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
       try {
@@ -166,6 +218,7 @@ io.on("connection", (socket) => {
         const analyzer = new PresentationAnalyzer(socket._transcript);
         const finalReport = await analyzer.runFullAnalysis({
           apiKey: getOpenAIApiKey(),
+          customPrompt: getCustomPromptForAnalysisType(socket._analysisType),
         });
         // The 'final-analysis' event signals the definitive end report
         socket.emit("final-analysis", finalReport);
@@ -205,4 +258,3 @@ server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
   console.log("Google Cloud Speech-to-Text initialized");
 });
-

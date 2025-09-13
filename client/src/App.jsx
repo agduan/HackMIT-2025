@@ -332,7 +332,6 @@ function App() {
             {selectedAnalysisType === "general" && "General"}
             {selectedAnalysisType === "teaching" && "Teaching"}
             {selectedAnalysisType === "interview" && "Interview"}
-            {selectedAnalysisType === "academic" && "Academic"}
             {" ▼"}
           </button>
           {isOptionsOpen && (
@@ -363,15 +362,6 @@ function App() {
                 }}
               >
                 Interview
-              </div>
-              <div
-                className={`dropdown-item ${selectedAnalysisType === "academic" ? "active" : ""}`}
-                onClick={() => {
-                  setSelectedAnalysisType("academic");
-                  setIsOptionsOpen(false);
-                }}
-              >
-                Academic/Research
               </div>
             </div>
           )}
