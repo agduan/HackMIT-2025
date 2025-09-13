@@ -15,7 +15,6 @@
   "dependencies": {
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "node-fetch": "^3.3.2",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
