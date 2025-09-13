@@ -7,9 +7,18 @@
 
 body {
     font-family:
-           "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-           "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-           sans-serif;
+        "SF Pro",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Roboto",
+        "Oxygen",
+        "Ubuntu",
+        "Cantarell",
+        "Fira Sans",
+        "Droid Sans",
+        "Helvetica Neue",
+        sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: #ffff;
@@ -47,7 +56,7 @@ header p {
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 10px;
-    text-shadow: none; 
+    text-shadow: none;
 }
 
 .error-message {
@@ -82,7 +91,7 @@ header p {
 .start-btn {
     background: linear-gradient(45deg, #38b73d, #21ab43);
     color: white;
-    border: 1px solid #ccc;       /* thin gray border */
+    border: 1px solid #ccc; /* thin gray border */
     border-radius: 12px;
 }
 
@@ -138,7 +147,7 @@ header p {
     right: 0;
     bottom: 0;
     background-color: #ccc;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 34px;
 }
 
@@ -150,12 +159,12 @@ header p {
     left: 4px;
     bottom: 4px;
     background-color: white;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 50%;
 }
 
 .toggle-input:checked + .toggle-slider {
-    background-color: #2196F3;
+    background-color: #2196f3;
 }
 
 .toggle-input:checked + .toggle-slider:before {
@@ -210,22 +219,22 @@ header p {
 }
 
 .main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
 .top-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 20px;
 }
 
 @media (max-width: 1024px) {
-  .top-section {
-    grid-template-columns: 1fr;
-  }
+    .top-section {
+        grid-template-columns: 1fr;
+    }
 }
 
 .video-section,
@@ -415,6 +424,51 @@ header p {
     margin-bottom: 0;
 }
 
+/* Qualitative Feedback Card */
+.qualitative-feedback-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 20px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    grid-column: 1 / -1; /* Take full width in grid */
+}
+
+.qualitative-feedback-card h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.qualitative-feedback-card h3:before {
+    content: "🤖";
+    font-size: 1.2rem;
+}
+
+.feedback-content {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    line-height: 1.6;
+    font-size: 1rem;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.error-note {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(255, 193, 7, 0.2);
+    border-radius: 5px;
+    border-left: 3px solid #ffc107;
+    font-size: 0.9rem;
+    color: #fff3cd;
+}
+
 /* Scrollbar styling */
 .transcript-content::-webkit-scrollbar {
     width: 8px;
@@ -437,7 +491,7 @@ header p {
 /* Responsive design */
 @media (max-width: 768px) {
     .app-container {
-        text-align: center;     /* center text inside */
+        text-align: center; /* center text inside */
         max-width: 1200px;
         width: 100%;
         padding: 15px;
@@ -460,11 +514,11 @@ header p {
     .metrics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .video-container {
         height: 300px;
     }
-    
+
     .top-section {
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); /* video 2x wider */

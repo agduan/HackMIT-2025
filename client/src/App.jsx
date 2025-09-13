@@ -17,9 +17,15 @@ function App() {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    socket.on("transcript-chunk", (words) => {
-      const newText = words.map((word) => word.word).join(" ");
-      setTranscript((prev) => prev + " " + newText);
+    // Handle final transcript chunks with timestamps
+    socket.on("transcript", (data) => {
+      setTranscript((prev) => prev + " " + data.text);
+    });
+
+    // Handle interim (real-time) transcript results
+    socket.on("interim-transcript", (data) => {
+      // You can use this for showing real-time typing effect
+      console.log("Interim:", data.text);
     });
 
     socket.on("live-feedback", (data) => {
@@ -36,11 +42,17 @@ function App() {
       setIsRecording(false);
     });
 
+    socket.on("transcription-error", (data) => {
+      setError(`Transcription error: ${data.message}`);
+    });
+
     return () => {
       socket.off("transcript");
+      socket.off("interim-transcript");
       socket.off("live-feedback");
       socket.off("final-analysis");
       socket.off("analysis-error");
+      socket.off("transcription-error");
     };
   }, []);
 
@@ -54,15 +66,16 @@ function App() {
       // Get audio and optionally video
       const mediaConstraints = { audio: true };
       if (videoFeedbackEnabled) {
-        mediaConstraints.video = { 
-          width: { ideal: 640 }, 
+        mediaConstraints.video = {
+          width: { ideal: 640 },
           height: { ideal: 480 },
-          facingMode: "user" // Front camera
+          facingMode: "user", // Front camera
         };
       }
-      
-      const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      
+
+      const stream =
+        await navigator.mediaDevices.getUserMedia(mediaConstraints);
+
       // Set up video display only if video feedback is enabled
       if (videoFeedbackEnabled) {
         setVideoStream(stream);
@@ -135,7 +148,7 @@ function App() {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
-      
+
       // Clear video stream
       setVideoStream(null);
       if (videoRef.current) {
@@ -181,12 +194,17 @@ function App() {
           feedback={data.pauses?.feedback}
           score={data.pauses?.score}
         />
-        <MetricCard
-          title="Sentiment"
-          value={data.sentiment?.score || "neutral"}
-          feedback={data.sentiment?.feedback}
-          score={data.sentiment?.score}
-        />
+        {data.qualitativeFeedback && (
+          <div className="qualitative-feedback-card">
+            <h3>AI Feedback</h3>
+            <div className="feedback-content">
+              {data.qualitativeFeedback.feedback}
+            </div>
+            {data.qualitativeFeedback.source === "error" && (
+              <p className="error-note">Note: Using fallback analysis</p>
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -194,8 +212,25 @@ function App() {
   return (
     <div className="app-container">
       <header>
-        <h1 style={{ fontFamily: 'Georgia, Times New Roman, serif', fontStyle: 'italic', fontWeight: 300, fontSize: '3em', letterSpacing: '0.02em' }}>Ok, Socrates</h1>
-        <div style={{ fontSize: '1em', color: '#888', marginTop: '-0.5em', fontFamily: 'SF Pro, Inter, Arial, sans-serif' }}>
+        <h1
+          style={{
+            fontFamily: "Georgia, Times New Roman, serif",
+            fontStyle: "italic",
+            fontWeight: 300,
+            fontSize: "3em",
+            letterSpacing: "0.02em",
+          }}
+        >
+          Ok, Socrates
+        </h1>
+        <div
+          style={{
+            fontSize: "1em",
+            color: "#888",
+            marginTop: "-0.5em",
+            fontFamily: "SF Pro, Inter, Arial, sans-serif",
+          }}
+        >
           Your personalized coach for real-time presentation feedback
         </div>
       </header>
@@ -303,7 +338,7 @@ function App() {
                   )}
               </div>
             )}
-            
+
             {!liveFeedback && !finalAnalysis && (
               <div className="feedback-placeholder">
                 <div className="placeholder-icon">Feedback</div>
