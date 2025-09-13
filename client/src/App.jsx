@@ -106,16 +106,26 @@ function App() {
       }
 
       // Check if MediaRecorder is supported and get supported MIME types
-      let mimeType = "audio/webm";
-      if (!MediaRecorder.isTypeSupported("audio/webm")) {
-        if (MediaRecorder.isTypeSupported("audio/mp4")) {
-          mimeType = "audio/mp4";
-        } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
-          mimeType = "audio/ogg";
-        } else {
-          mimeType = "";
-        }
-      }
+      // let mimeType = "audio/webm";
+      // if (!MediaRecorder.isTypeSupported("audio/webm")) {
+      //   if (MediaRecorder.isTypeSupported("audio/mp4")) {
+      //     mimeType = "audio/mp4";
+      //   } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+      //     mimeType = "audio/ogg";
+      //   } else {
+      //     mimeType = "";
+      //   }
+      // }
+
+      let mimeType = "";
+      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+        mimeType = "audio/webm;codecs=opus";
+      } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+        mimeType = "audio/webm";
+      } else if (MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")) {
+      // Only use this if your server also supports OGG/Opus (yours expects WEBM_OPUS)
+        mimeType = "audio/ogg;codecs=opus";
+           } // else leave empty and let the browser pick
 
       console.log("Using MIME type:", mimeType);
       
