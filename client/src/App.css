@@ -101,6 +101,20 @@ header p {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
+.toggle-btn {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+    color: white;
+}
+
+.toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-btn.disabled {
+    background: linear-gradient(45deg, #9E9E9E, #757575);
+}
+
 .control-btn.disabled {
     opacity: 0.6;
     cursor: not-allowed;

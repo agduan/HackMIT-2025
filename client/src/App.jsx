@@ -12,6 +12,7 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState(null);
   const [videoStream, setVideoStream] = useState(null);
+  const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(true);
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -50,20 +51,24 @@ function App() {
       setLiveFeedback(null);
       setFinalAnalysis(null);
 
-      // Get both audio and video
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: true, 
-        video: { 
+      // Get audio and optionally video
+      const mediaConstraints = { audio: true };
+      if (videoFeedbackEnabled) {
+        mediaConstraints.video = { 
           width: { ideal: 640 }, 
           height: { ideal: 480 },
           facingMode: "user" // Front camera
-        } 
-      });
+        };
+      }
       
-      // Set up video display
-      setVideoStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+      const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      
+      // Set up video display only if video feedback is enabled
+      if (videoFeedbackEnabled) {
+        setVideoStream(stream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
       }
 
       // Check if MediaRecorder is supported and get supported MIME types
@@ -106,6 +111,17 @@ function App() {
       setError("Failed to access camera/microphone. Please check permissions.");
       console.error("Error starting recording:", err);
       setIsRecording(false);
+    }
+  };
+
+  const toggleVideoFeedback = () => {
+    setVideoFeedbackEnabled(!videoFeedbackEnabled);
+    // If currently recording, stop and restart with new video setting
+    if (isRecording) {
+      stopRecording();
+      setTimeout(() => {
+        startRecording();
+      }, 100);
     }
   };
 
@@ -203,6 +219,12 @@ function App() {
         >
           ⏹️ Stop & Analyze
         </button>
+        <button
+          onClick={toggleVideoFeedback}
+          className={`control-btn toggle-btn ${videoFeedbackEnabled ? "enabled" : "disabled"}`}
+        >
+          {videoFeedbackEnabled ? "📹 Video On" : "📹 Video Off"}
+        </button>
       </div>
 
       {isRecording && (
@@ -219,7 +241,12 @@ function App() {
           <section className="video-section">
             <h2>📹 Your Presentation</h2>
             <div className="video-container">
-              {videoStream ? (
+              {!videoFeedbackEnabled ? (
+                <div className="video-placeholder">
+                  <div className="placeholder-icon">📹</div>
+                  <p>Video feedback turned off</p>
+                </div>
+              ) : videoStream ? (
                 <video
                   ref={videoRef}
                   autoPlay
