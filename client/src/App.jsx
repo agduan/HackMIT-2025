@@ -194,13 +194,13 @@ function App() {
   return (
     <div className="app-container">
       <header>
-        <h1>🎤 Socrates - Live Presentation Coach</h1>
+        <h1>Socrates - Live Presentation Coach</h1>
         <p>Get real-time feedback on your presentation skills</p>
       </header>
 
       {error && (
         <div className="error-message">
-          <p>⚠️ {error}</p>
+          <p>{error}</p>
         </div>
       )}
 
@@ -210,21 +210,29 @@ function App() {
           disabled={isRecording}
           className={`control-btn start-btn ${isRecording ? "disabled" : ""}`}
         >
-          {isRecording ? "🔴 Recording..." : "▶️ Start Presentation"}
+          {isRecording ? "Recording..." : "Start Presentation"}
         </button>
         <button
           onClick={stopRecording}
           disabled={!isRecording}
           className={`control-btn stop-btn ${!isRecording ? "disabled" : ""}`}
         >
-          ⏹️ Stop & Analyze
+          Stop & Analyze
         </button>
-        <button
-          onClick={toggleVideoFeedback}
-          className={`control-btn toggle-btn ${videoFeedbackEnabled ? "enabled" : "disabled"}`}
-        >
-          {videoFeedbackEnabled ? "📹 Video On" : "📹 Video Off"}
-        </button>
+        <div className="video-toggle-container">
+          <label className="toggle-label">
+            <span>Video Feedback</span>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={videoFeedbackEnabled}
+                onChange={toggleVideoFeedback}
+                className="toggle-input"
+              />
+              <span className="toggle-slider"></span>
+            </div>
+          </label>
+        </div>
       </div>
 
       {isRecording && (
@@ -239,11 +247,11 @@ function App() {
         <div className="top-section">
           {/* Video Section - Left */}
           <section className="video-section">
-            <h2>📹 Your Presentation</h2>
+            <h2>Your Presentation</h2>
             <div className="video-container">
               {!videoFeedbackEnabled ? (
                 <div className="video-placeholder">
-                  <div className="placeholder-icon">📹</div>
+                  <div className="placeholder-icon">Video</div>
                   <p>Video feedback turned off</p>
                 </div>
               ) : videoStream ? (
@@ -256,7 +264,7 @@ function App() {
                 />
               ) : (
                 <div className="video-placeholder">
-                  <div className="placeholder-icon">📹</div>
+                  <div className="placeholder-icon">Video</div>
                   <p>Click "Start Presentation" to begin video</p>
                 </div>
               )}
@@ -265,23 +273,23 @@ function App() {
 
           {/* Feedback Section - Right */}
           <section className="feedback-section">
-            <h2>📊 Real-time Feedback</h2>
+            <h2>Real-time Feedback</h2>
             {liveFeedback && (
               <div className="live-feedback">
-                <h3>🔄 Live Analysis</h3>
+                <h3>Live Analysis</h3>
                 {renderMetrics(liveFeedback)}
               </div>
             )}
 
             {finalAnalysis && (
               <div className="final-analysis">
-                <h3>✅ Final Analysis</h3>
+                <h3>Final Analysis</h3>
                 {renderMetrics(finalAnalysis)}
 
                 {finalAnalysis.followUpQuestions &&
                   finalAnalysis.followUpQuestions.length > 0 && (
                     <div className="followup-questions">
-                      <h4>💭 Suggested Follow-up Questions</h4>
+                      <h4>Suggested Follow-up Questions</h4>
                       <ul>
                         {finalAnalysis.followUpQuestions.map(
                           (question, index) => (
@@ -296,7 +304,7 @@ function App() {
             
             {!liveFeedback && !finalAnalysis && (
               <div className="feedback-placeholder">
-                <div className="placeholder-icon">📊</div>
+                <div className="placeholder-icon">Feedback</div>
                 <p>Start presenting to see real-time feedback</p>
               </div>
             )}
@@ -305,7 +313,7 @@ function App() {
 
         {/* Bottom section: Transcript */}
         <section className="transcript-section">
-          <h2>📝 Live Transcript</h2>
+          <h2>Live Transcript</h2>
           <div className="transcript-content">
             {transcript || "Start speaking to see your transcript here..."}
           </div>

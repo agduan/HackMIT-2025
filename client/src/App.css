@@ -101,18 +101,68 @@ header p {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.toggle-btn {
-    background: linear-gradient(45deg, #2196F3, #1976D2);
-    color: white;
+/* Toggle Switch Styles */
+.video-toggle-container {
+    display: flex;
+    align-items: center;
 }
 
-.toggle-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
 }
 
-.toggle-btn.disabled {
-    background: linear-gradient(45deg, #9E9E9E, #757575);
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-input:checked + .toggle-slider {
+    background-color: #2196F3;
+}
+
+.toggle-input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-slider:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .control-btn.disabled {
