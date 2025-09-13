@@ -12,7 +12,7 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #ffff;
     min-height: 100vh;
     color: #333;
     /* Centering setup */
@@ -32,19 +32,22 @@ body {
 header {
     text-align: center;
     margin-bottom: 40px;
-    color: white;
+    color: #333;
 }
 
 header h1 {
+    margin-top: 40px;
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 10px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: none;
 }
 
 header p {
-    font-size: 1.2rem;
-    opacity: 0.9;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: none; 
 }
 
 .error-message {
@@ -77,8 +80,10 @@ header p {
 }
 
 .start-btn {
-    background: linear-gradient(45deg, #4caf50, #45a049);
+    background: linear-gradient(45deg, #38b73d, #21ab43);
     color: white;
+    border: 1px solid #ccc;       /* thin gray border */
+    border-radius: 30px;
 }
 
 .start-btn:hover:not(.disabled) {
