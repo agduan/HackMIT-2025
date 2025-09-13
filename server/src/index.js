@@ -2,19 +2,30 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-// Use Node.js built-in fetch (available in Node 18+)
-const fetch = globalThis.fetch;
+const speech = require("@google-cloud/speech");
 const { PresentationAnalyzer } = require("./analysis/PresentationAnalyzer");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-const WISPR_ENDPOINT = process.env.WISPR_ENDPOINT;
-const WISPR_KEY = process.env.WISPR_KEY;
+// Initialize Google Cloud Speech client
+const speechClient = new speech.SpeechClient({
+  keyFilename: "./fundamental-run-472018-j4-f9e30ffa6932.json",
+});
 
 // --- Configuration for Live Feedback ---
 const LIVE_FEEDBACK_INTERVAL_MS = 5000; // Send feedback every 5 seconds
+
+// Speech recognition configuration
+const speechConfig = {
+  encoding: "WEBM_OPUS",
+  sampleRateHertz: 48000,
+  languageCode: "en-US",
+  enableWordTimeOffsets: true,
+  enableAutomaticPunctuation: true,
+  model: "latest_long",
+};
 
 io.on("connection", (socket) => {
   console.log("client connected", socket.id);
@@ -22,54 +33,120 @@ io.on("connection", (socket) => {
   // Initialize data stores for this specific client's session
   socket._transcript = [];
   socket._lastFeedbackTimestamp = Date.now();
+  socket._recognizeStream = null;
+
+  // Start streaming recognition when client connects
+  const startRecognitionStream = () => {
+    socket._recognizeStream = speechClient
+      .streamingRecognize({
+        config: speechConfig,
+        interimResults: true,
+      })
+      .on("data", (data) => {
+        if (data.results && data.results.length > 0) {
+          const result = data.results[0];
+
+          if (result.isFinal && result.alternatives && result.alternatives[0]) {
+            const transcript = result.alternatives[0];
+
+            // Process words with timestamps if available
+            if (transcript.words && transcript.words.length > 0) {
+              const words = transcript.words.map((word) => ({
+                word: word.word,
+                startTime: word.startTime
+                  ? parseFloat(word.startTime.seconds || 0) +
+                    parseFloat(word.startTime.nanos || 0) / 1000000000
+                  : 0,
+                endTime: word.endTime
+                  ? parseFloat(word.endTime.seconds || 0) +
+                    parseFloat(word.endTime.nanos || 0) / 1000000000
+                  : 0,
+              }));
+
+              // Add new words to the transcript
+              socket._transcript.push(...words);
+
+              // Send transcript text to client
+              const transcriptText = words.map((w) => w.word).join(" ");
+              console.log(`Sending transcript: "${transcriptText}"`);
+              socket.emit("transcript", { text: transcriptText });
+
+              // --- Live Analysis Logic ---
+              const now = Date.now();
+              if (
+                now - socket._lastFeedbackTimestamp >
+                LIVE_FEEDBACK_INTERVAL_MS
+              ) {
+                console.log(`Sending live feedback for socket: ${socket.id}`);
+
+                // Run analysis on the transcript accumulated so far
+                if (socket._transcript.length > 0) {
+                  try {
+                    const analyzer = new PresentationAnalyzer(
+                      socket._transcript,
+                    );
+                    analyzer
+                      .runFullAnalysis({
+                        apiKey: process.env.OPENAI_API_KEY,
+                      })
+                      .then((liveReport) => {
+                        socket.emit("live-feedback", liveReport);
+                      })
+                      .catch((error) => {
+                        console.error("Error during live analysis:", error);
+                      });
+                  } catch (error) {
+                    console.error(
+                      "Error creating analyzer for live feedback:",
+                      error,
+                    );
+                  }
+                }
+
+                // Reset the timer
+                socket._lastFeedbackTimestamp = now;
+              }
+            }
+          } else if (!result.isFinal) {
+            // Handle interim results for real-time display
+            const interimText = result.alternatives[0]?.transcript || "";
+            if (interimText.trim()) {
+              socket.emit("interim-transcript", { text: interimText });
+            }
+          }
+        }
+      })
+      .on("error", (error) => {
+        console.error("Google Cloud Speech error:", error);
+        socket.emit("transcription-error", {
+          message: "Speech recognition error occurred",
+          error: error.message,
+        });
+
+        // Restart the stream after a brief delay
+        setTimeout(() => {
+          if (socket.connected) {
+            startRecognitionStream();
+          }
+        }, 1000);
+      })
+      .on("end", () => {
+        console.log("Recognition stream ended for socket:", socket.id);
+      });
+  };
+
+  // Start the recognition stream
+  startRecognitionStream();
 
   socket.on("audio-chunk", async (arrayBuffer) => {
-    const audioBuffer = Buffer.from(arrayBuffer);
-
-    try {
-      const res = await fetch(WISPR_ENDPOINT, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${WISPR_KEY}`,
-          "Content-Type": "audio/webm", // Adjust if your audio format is different
-        },
-        body: audioBuffer,
-      });
-      const json = await res.json();
-
-      if (
-        json &&
-        json.words &&
-        Array.isArray(json.words) &&
-        json.words.length > 0
-      ) {
-        // Add new words to the transcript and send them to the client for live display
-        socket._transcript.push(...json.words);
-
-        // Send transcript text to client
-        const transcriptText = json.words.map((w) => w.word).join(" ");
-        console.log(`Sending transcript: "${transcriptText}"`);
-        socket.emit("transcript", { text: transcriptText });
-
-        // --- Live Analysis Logic ---
-        // Check if enough time has passed to send a new feedback update
-        const now = Date.now();
-        if (now - socket._lastFeedbackTimestamp > LIVE_FEEDBACK_INTERVAL_MS) {
-          console.log(`Sending live feedback for socket: ${socket.id}`);
-
-          // Run analysis on the transcript accumulated so far
-          const analyzer = new PresentationAnalyzer(socket._transcript);
-          const liveReport = analyzer.runFullAnalysis();
-
-          // Emit a separate event for live feedback
-          socket.emit("live-feedback", liveReport);
-
-          // Reset the timer
-          socket._lastFeedbackTimestamp = now;
-        }
+    if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
+      try {
+        // Convert ArrayBuffer to Buffer and send to Google Cloud Speech
+        const audioBuffer = Buffer.from(arrayBuffer);
+        socket._recognizeStream.write(audioBuffer);
+      } catch (error) {
+        console.error("Error writing audio chunk:", error);
       }
-    } catch (err) {
-      console.error("wispr error", err);
     }
   });
 
@@ -78,16 +155,24 @@ io.on("connection", (socket) => {
       `Stream ended. Running FINAL analysis for socket: ${socket.id}`,
     );
 
+    // End the recognition stream
+    if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
+      socket._recognizeStream.end();
+    }
+
     if (socket._transcript && socket._transcript.length > 0) {
       try {
         const analyzer = new PresentationAnalyzer(socket._transcript);
-        const finalReport = analyzer.runFullAnalysis();
+        const finalReport = await analyzer.runFullAnalysis({
+          apiKey: process.env.OPENAI_API_KEY,
+        });
         // The 'final-analysis' event signals the definitive end report
         socket.emit("final-analysis", finalReport);
       } catch (error) {
         console.error("Error during final analysis:", error);
         socket.emit("analysis-error", {
           message: "Failed to analyze the presentation.",
+          error: error.message,
         });
       }
     } else {
@@ -96,12 +181,26 @@ io.on("connection", (socket) => {
         message: "No transcript was generated to analyze.",
       });
     }
+
     // Clear the transcript for the next session
     socket._transcript = [];
   });
 
-  socket.on("disconnect", () => console.log("disconnected", socket.id));
+  socket.on("disconnect", () => {
+    console.log("client disconnected", socket.id);
+
+    // Clean up recognition stream
+    if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
+      socket._recognizeStream.end();
+    }
+
+    // Clear transcript data
+    socket._transcript = [];
+  });
 });
 
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => console.log("listening on", PORT));
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+  console.log("Google Cloud Speech-to-Text initialized");
+});
