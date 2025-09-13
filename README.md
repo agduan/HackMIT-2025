@@ -1,13 +1,11 @@
-# 🎤 Socrates - Live Presentation Coach
-Socrates is a presentation analyzer and note taker web app. It will listen to you give your presentation, take notes, and give feedback -- both as followup questions and how to improve your presenting skills.
+# Ok, Socrates: A Live Presentation Coach
+Ok, Socrates is a real-time presentation analyzer and note taker web app. It will transcribe and provide instant feedback on speaking pace, filler words, pauses, and sentiment during live presentations.
 
-This is for the education track at HackMIT 2025 and the Wispr Sponsor Challenge:
+This was made for the education track at HackMIT 2025 and the Wispr Sponsor Challenge.
 
-A real-time presentation analysis web app that provides instant feedback on speaking pace, filler words, pauses, and sentiment during live presentations. Built for the Wispr Challenge at HackMIT 2025.
+## Features
 
-## ✨ Features
-
-- **Real-time Speech-to-Text**: Uses Wispr API for accurate transcription
+- **Real-time Speech-to-Text**: Uses Google Cloud Speech-to-Text API for accurate transcription
 - **Live Feedback**: Get instant analysis every 5 seconds during your presentation
 - **Comprehensive Metrics**:
   - Speaking pace (WPM analysis)
@@ -18,12 +16,13 @@ A real-time presentation analysis web app that provides instant feedback on spea
 - **Follow-up Questions**: AI-generated questions based on your presentation content
 - **Final Analysis**: Complete report at the end of your presentation
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
 - Node.js (v16 or higher)
-- Wispr API key (get 3 months free with student email)
+- Google Cloud Speech-to-Text API
+- OpenAI API
 
 ### Installation
 
@@ -62,10 +61,12 @@ A real-time presentation analysis web app that provides instant feedback on spea
    VITE_SOCKET_URL=http://localhost:4000
    ```
 
-4. **Get your Wispr API key**
-   - Visit [Wispr](https://wispr.ai)
-   - Sign up with your student email
-   - Get 3 months of Flow Pro for free
+4. **Get your OpenAI API key**
+   - Visit [OpenAI](https://openai.com)
+   - Copy your API key to the `.env` file
+
+5. **Get your Google Cloud API key**
+   - Visit [Google Cloud](https://cloud.google.com/apis)
    - Copy your API key to the `.env` file
 
 ### Running the Application
