@@ -29,10 +29,12 @@ function App() {
     });
 
     socket.on("live-feedback", (data) => {
+      console.log("Received live feedback:", data);
       setLiveFeedback(data);
     });
 
     socket.on("final-analysis", (data) => {
+      console.log("Received final analysis:", data);
       setFinalAnalysis(data);
       setIsRecording(false);
     });
@@ -71,20 +73,31 @@ function App() {
       setLiveFeedback(null);
       setFinalAnalysis(null);
 
-      // Get audio and optionally video
-      const mediaConstraints = { audio: true };
+      console.log("Starting recording with video:", videoFeedbackEnabled);
+
+      // Get audio and optionally video - optimize video constraints
+      const mediaConstraints = { 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 48000
+        }
+      };
+      
       if (videoFeedbackEnabled) {
         mediaConstraints.video = {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: "user", // Front camera
+          width: { ideal: 320, max: 480 }, // Reduced from 640
+          height: { ideal: 240, max: 360 }, // Reduced from 480
+          facingMode: "user",
+          frameRate: { ideal: 15, max: 20 } // Limit frame rate
         };
       }
 
-      const stream =
-        await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      console.log("Requesting media with constraints:", mediaConstraints);
+      const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      console.log("Media stream obtained:", stream.getTracks().map(t => `${t.kind}: ${t.label}`));
 
-      // Set up video display only if video feedback is enabled
+      // Set up video display with the full stream (including video)
       if (videoFeedbackEnabled) {
         setVideoStream(stream);
         if (videoRef.current) {
@@ -104,14 +117,22 @@ function App() {
         }
       }
 
+      console.log("Using MIME type:", mimeType);
+      
+      // Create MediaRecorder with only audio track to avoid conflicts
+      const audioOnlyStream = new MediaStream([stream.getAudioTracks()[0]]);
       const mediaRecorder = new MediaRecorder(
-        stream,
+        audioOnlyStream,
         mimeType ? { mimeType } : {},
       );
       mediaRecorderRef.current = mediaRecorder;
+      
+      // Store the full stream reference for cleanup
+      mediaRecorder.fullStream = stream;
 
       mediaRecorder.addEventListener("dataavailable", async (e) => {
         if (!e.data || e.data.size === 0) return;
+        console.log("Audio chunk size:", e.data.size, "bytes");
         const arrayBuffer = await e.data.arrayBuffer();
         socket.emit("audio-chunk", arrayBuffer);
       });
@@ -127,7 +148,8 @@ function App() {
         setIsRecording(false);
       });
 
-      mediaRecorder.start(250); // emit every 250ms
+      // Use longer intervals to reduce processing overhead
+      mediaRecorder.start(500); // emit every 500ms instead of 250ms
     } catch (err) {
       setError("Failed to access camera/microphone. Please check permissions.");
       console.error("Error starting recording:", err);
@@ -147,14 +169,18 @@ function App() {
   };
 
   const stopRecording = () => {
+    console.log("Stopping recording...");
     const mr = mediaRecorderRef.current;
     if (mr && mr.state === "recording") {
       mr.stop();
 
-      // Stop all tracks in the stream to release the microphone and camera
-      const stream = mr.stream;
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      // Stop all tracks in the full stream (both audio and video)
+      const fullStream = mr.fullStream;
+      if (fullStream) {
+        fullStream.getTracks().forEach((track) => {
+          console.log(`Stopping ${track.kind} track:`, track.label);
+          track.stop();
+        });
       }
 
       // Clear video stream
@@ -281,19 +307,19 @@ function App() {
         </div>
       </div>
 
-      {isRecording && (
-        <div className="recording-indicator">
-          <div className="pulse"></div>
-          <span>Live analysis in progress...</span>
-        </div>
-      )}
-
       <div className="main-content">
         {/* Top section: Video and Feedback side by side */}
         <div className="top-section">
           {/* Video Section - Left */}
           <section className="video-section">
-            <h2>Your Presentation</h2>
+            <h2>
+              Your Presentation
+              {isRecording && (
+                <span style={{ marginLeft: '10px', display: 'inline-flex', alignItems: 'center' }}>
+                  <div className="pulse" style={{ width: '12px', height: '12px' }}></div>
+                </span>
+              )}
+            </h2>
             <div className="video-container">
               {!videoFeedbackEnabled ? (
                 <div className="video-placeholder">
