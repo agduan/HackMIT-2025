@@ -15,6 +15,11 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
+    /* Centering setup */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .app-container {
@@ -311,6 +316,9 @@ header p {
 /* Responsive design */
 @media (max-width: 768px) {
     .app-container {
+        text-align: center;     /* center text inside */
+        max-width: 1200px;
+        width: 100%;
         padding: 15px;
     }
 
