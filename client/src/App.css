@@ -415,6 +415,9 @@ header p {
     }
     
     .top-section {
-        gap: 20px;
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); /* video 2x wider */
+        gap: 30px;
+        margin-bottom: 20px;
     }
 }
