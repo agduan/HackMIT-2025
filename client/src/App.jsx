@@ -46,6 +46,14 @@ function App() {
       setError(`Transcription error: ${data.message}`);
     });
 
+    // fetch private JSON from Vercel API
+    fetch("/api/get-json")
+    .then(res => res.json())
+    .then(data => {
+      console.log("Private JSON from server:", data);
+    })
+    .catch(err => console.error(err));
+
     return () => {
       socket.off("transcript");
       socket.off("interim-transcript");
