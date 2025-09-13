@@ -34,7 +34,7 @@ function App() {
     });
 
     return () => {
-      socket.off("transcript-chunk");
+      socket.off("transcript");
       socket.off("live-feedback");
       socket.off("final-analysis");
       socket.off("analysis-error");
