@@ -13,6 +13,7 @@ function App() {
   const [error, setError] = useState(null);
   const [videoStream, setVideoStream] = useState(null);
   const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -76,26 +77,30 @@ function App() {
       console.log("Starting recording with video:", videoFeedbackEnabled);
 
       // Get audio and optionally video - optimize video constraints
-      const mediaConstraints = { 
+      const mediaConstraints = {
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          sampleRate: 48000
-        }
+          sampleRate: 48000,
+        },
       };
-      
+
       if (videoFeedbackEnabled) {
         mediaConstraints.video = {
           width: { ideal: 320, max: 480 }, // Reduced from 640
           height: { ideal: 240, max: 360 }, // Reduced from 480
           facingMode: "user",
-          frameRate: { ideal: 15, max: 20 } // Limit frame rate
+          frameRate: { ideal: 15, max: 20 }, // Limit frame rate
         };
       }
 
       console.log("Requesting media with constraints:", mediaConstraints);
-      const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      console.log("Media stream obtained:", stream.getTracks().map(t => `${t.kind}: ${t.label}`));
+      const stream =
+        await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      console.log(
+        "Media stream obtained:",
+        stream.getTracks().map((t) => `${t.kind}: ${t.label}`),
+      );
 
       // Set up video display with the full stream (including video)
       if (videoFeedbackEnabled) {
@@ -123,12 +128,12 @@ function App() {
       } else if (MediaRecorder.isTypeSupported("audio/webm")) {
         mimeType = "audio/webm";
       } else if (MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")) {
-      // Only use this if your server also supports OGG/Opus (yours expects WEBM_OPUS)
+        // Only use this if your server also supports OGG/Opus (yours expects WEBM_OPUS)
         mimeType = "audio/ogg;codecs=opus";
-           } // else leave empty and let the browser pick
+      } // else leave empty and let the browser pick
 
       console.log("Using MIME type:", mimeType);
-      
+
       // Create MediaRecorder with only audio track to avoid conflicts
       const audioOnlyStream = new MediaStream([stream.getAudioTracks()[0]]);
       const mediaRecorder = new MediaRecorder(
@@ -136,7 +141,7 @@ function App() {
         mimeType ? { mimeType } : {},
       );
       mediaRecorderRef.current = mediaRecorder;
-      
+
       // Store the full stream reference for cleanup
       mediaRecorder.fullStream = stream;
 
@@ -315,6 +320,21 @@ function App() {
             </div>
           </label>
         </div>
+        <div className="options-dropdown">
+          <button
+            onClick={() => setIsOptionsOpen(!isOptionsOpen)}
+            className="options-btn"
+          >
+            Options ▼
+          </button>
+          {isOptionsOpen && (
+            <div className="dropdown-menu">
+              <div className="dropdown-item">Setting 1 (Coming Soon)</div>
+              <div className="dropdown-item">Setting 2 (Coming Soon)</div>
+              <div className="dropdown-item">Setting 3 (Coming Soon)</div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="main-content">
@@ -325,8 +345,17 @@ function App() {
             <h2>
               Your Presentation
               {isRecording && (
-                <span style={{ marginLeft: '10px', display: 'inline-flex', alignItems: 'center' }}>
-                  <div className="pulse" style={{ width: '12px', height: '12px' }}></div>
+                <span
+                  style={{
+                    marginLeft: "10px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    className="pulse"
+                    style={{ width: "12px", height: "12px" }}
+                  ></div>
                 </span>
               )}
             </h2>
