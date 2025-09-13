@@ -14,9 +14,9 @@ function App() {
   const mediaRecorderRef = useRef(null);
 
   useEffect(() => {
-    socket.on("transcript-chunk", (words) => {
-      const newText = words.map(word => word.word).join(" ");
-      setTranscript((prev) => prev + " " + newText);
+    socket.on("transcript", (data) => {
+      console.log("Received transcript:", data.text);
+      setTranscript((prev) => prev + " " + data.text);
     });
 
     socket.on("live-feedback", (data) => {
@@ -34,7 +34,7 @@ function App() {
     });
 
     return () => {
-      socket.off("transcript-chunk");
+      socket.off("transcript");
       socket.off("live-feedback");
       socket.off("final-analysis");
       socket.off("analysis-error");

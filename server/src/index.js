@@ -39,8 +39,11 @@ io.on('connection', (socket) => {
       if (json && json.words && Array.isArray(json.words) && json.words.length > 0) {
         // Add new words to the transcript and send them to the client for live display
         socket._transcript.push(...json.words);
-        socket.emit('transcript-chunk', json.words);
-        socket.emit('transcript', { text: json.words.map(w => w.word).join(" ") });
+        
+        // Send transcript text to client
+        const transcriptText = json.words.map(w => w.word).join(" ");
+        console.log(`Sending transcript: "${transcriptText}"`);
+        socket.emit('transcript', { text: transcriptText });
 
         // --- Live Analysis Logic ---
         // Check if enough time has passed to send a new feedback update
