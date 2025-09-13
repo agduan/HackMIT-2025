@@ -35,16 +35,9 @@ io.on("connection", (socket) => {
   socket._transcript = [];
   socket._lastFeedbackTimestamp = Date.now();
   socket._recognizeStream = null;
-  socket._isStreamActive = false;
 
   // Start streaming recognition when client connects
   const startRecognitionStream = () => {
-    // Close existing stream if it exists
-    if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
-      socket._recognizeStream.end();
-    }
-
-    socket._isStreamActive = true;
     socket._recognizeStream = speechClient
       .streamingRecognize({
         config: speechConfig,
@@ -126,46 +119,34 @@ io.on("connection", (socket) => {
       })
       .on("error", (error) => {
         console.error("Google Cloud Speech error:", error);
-        socket._isStreamActive = false;
-        // socket.emit("transcription-error", {
-        //   message: "Speech recognition error occurred",
-        //   error: error.message,
-        // });
+        socket.emit("transcription-error", {
+          message: "Speech recognition error occurred",
+          error: error.message,
+        });
 
         // Restart the stream after a brief delay
         setTimeout(() => {
-          if (socket.connected && !socket._isStreamActive) {
+          if (socket.connected) {
             startRecognitionStream();
           }
         }, 1000);
       })
       .on("end", () => {
         console.log("Recognition stream ended for socket:", socket.id);
-        socket._isStreamActive = false;
       });
   };
 
-  // Don't start the recognition stream immediately
-  // It will start when the first audio chunk is received
+  // Start the recognition stream
+  startRecognitionStream();
 
   socket.on("audio-chunk", async (arrayBuffer) => {
-    // Start stream if not already active
-    if (!socket._isStreamActive) {
-      startRecognitionStream();
-    }
-
-    if (
-      socket._recognizeStream &&
-      !socket._recognizeStream.destroyed &&
-      socket._isStreamActive
-    ) {
+    if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
       try {
         // Convert ArrayBuffer to Buffer and send to Google Cloud Speech
         const audioBuffer = Buffer.from(arrayBuffer);
         socket._recognizeStream.write(audioBuffer);
       } catch (error) {
         console.error("Error writing audio chunk:", error);
-        socket._isStreamActive = false;
       }
     }
   });
@@ -176,7 +157,6 @@ io.on("connection", (socket) => {
     );
 
     // End the recognition stream
-    socket._isStreamActive = false;
     if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
       socket._recognizeStream.end();
     }
@@ -198,9 +178,9 @@ io.on("connection", (socket) => {
       }
     } else {
       console.log(`No transcript data to analyze for socket: ${socket.id}`);
-      // socket.emit("analysis-error", {
-      //   message: "No transcript was generated to analyze.",
-      // });
+      socket.emit("analysis-error", {
+        message: "No transcript was generated to analyze.",
+      });
     }
 
     // Clear the transcript for the next session
@@ -211,7 +191,6 @@ io.on("connection", (socket) => {
     console.log("client disconnected", socket.id);
 
     // Clean up recognition stream
-    socket._isStreamActive = false;
     if (socket._recognizeStream && !socket._recognizeStream.destroyed) {
       socket._recognizeStream.end();
     }
@@ -226,3 +205,4 @@ server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
   console.log("Google Cloud Speech-to-Text initialized");
 });
+

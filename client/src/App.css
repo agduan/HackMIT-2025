@@ -196,7 +196,7 @@ header p {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    min-width: 140px;
+    width: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -214,7 +214,7 @@ header p {
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
+    width: 180px;
     background: white;
     border: 1px solid #ddd;
     border-radius: 12px;
@@ -240,6 +240,17 @@ header p {
 .dropdown-item:hover {
     background: #f8f9fa;
     color: #333;
+}
+
+.dropdown-item.active {
+    background: #667eea;
+    color: white;
+    font-weight: 600;
+}
+
+.dropdown-item.active:hover {
+    background: #5a6fd8;
+    color: white;
 }
 
 .control-btn.disabled {

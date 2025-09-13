@@ -14,6 +14,7 @@ function App() {
   const [videoStream, setVideoStream] = useState(null);
   const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [selectedAnalysisType, setSelectedAnalysisType] = useState("general");
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -30,12 +31,10 @@ function App() {
     });
 
     socket.on("live-feedback", (data) => {
-      console.log("Received live feedback:", data);
       setLiveFeedback(data);
     });
 
     socket.on("final-analysis", (data) => {
-      console.log("Received final analysis:", data);
       setFinalAnalysis(data);
       setIsRecording(false);
     });
@@ -66,6 +65,11 @@ function App() {
       socket.off("transcription-error");
     };
   }, []);
+
+  // Send analysis type to server when it changes
+  useEffect(() => {
+    socket.emit("set-analysis-type", { analysisType: selectedAnalysisType });
+  }, [selectedAnalysisType]);
 
   const startRecording = async () => {
     try {
@@ -325,13 +329,50 @@ function App() {
             onClick={() => setIsOptionsOpen(!isOptionsOpen)}
             className="options-btn"
           >
-            Options ▼
+            {selectedAnalysisType === "general" && "General"}
+            {selectedAnalysisType === "teaching" && "Teaching"}
+            {selectedAnalysisType === "interview" && "Interview"}
+            {selectedAnalysisType === "academic" && "Academic"}
+            {" ▼"}
           </button>
           {isOptionsOpen && (
             <div className="dropdown-menu">
-              <div className="dropdown-item">Setting 1 (Coming Soon)</div>
-              <div className="dropdown-item">Setting 2 (Coming Soon)</div>
-              <div className="dropdown-item">Setting 3 (Coming Soon)</div>
+              <div
+                className={`dropdown-item ${selectedAnalysisType === "general" ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedAnalysisType("general");
+                  setIsOptionsOpen(false);
+                }}
+              >
+                General
+              </div>
+              <div
+                className={`dropdown-item ${selectedAnalysisType === "teaching" ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedAnalysisType("teaching");
+                  setIsOptionsOpen(false);
+                }}
+              >
+                Teaching
+              </div>
+              <div
+                className={`dropdown-item ${selectedAnalysisType === "interview" ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedAnalysisType("interview");
+                  setIsOptionsOpen(false);
+                }}
+              >
+                Interview
+              </div>
+              <div
+                className={`dropdown-item ${selectedAnalysisType === "academic" ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedAnalysisType("academic");
+                  setIsOptionsOpen(false);
+                }}
+              >
+                Academic/Research
+              </div>
             </div>
           )}
         </div>
