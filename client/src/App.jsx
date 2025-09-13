@@ -11,7 +11,9 @@ function App() {
   const [finalAnalysis, setFinalAnalysis] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState(null);
+  const [videoStream, setVideoStream] = useState(null);
   const mediaRecorderRef = useRef(null);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     socket.on("transcript-chunk", (words) => {
@@ -48,7 +50,21 @@ function App() {
       setLiveFeedback(null);
       setFinalAnalysis(null);
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Get both audio and video
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: true, 
+        video: { 
+          width: { ideal: 640 }, 
+          height: { ideal: 480 },
+          facingMode: "user" // Front camera
+        } 
+      });
+      
+      // Set up video display
+      setVideoStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
 
       // Check if MediaRecorder is supported and get supported MIME types
       let mimeType = "audio/webm";
@@ -87,7 +103,7 @@ function App() {
 
       mediaRecorder.start(250); // emit every 250ms
     } catch (err) {
-      setError("Failed to access microphone. Please check permissions.");
+      setError("Failed to access camera/microphone. Please check permissions.");
       console.error("Error starting recording:", err);
       setIsRecording(false);
     }
@@ -98,10 +114,16 @@ function App() {
     if (mr && mr.state === "recording") {
       mr.stop();
 
-      // Stop all tracks in the stream to release the microphone
+      // Stop all tracks in the stream to release the microphone and camera
       const stream = mr.stream;
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
+      }
+      
+      // Clear video stream
+      setVideoStream(null);
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
       }
 
       socket.emit("end-stream");
@@ -190,43 +212,76 @@ function App() {
         </div>
       )}
 
-      <div className="content-grid">
+      <div className="main-content">
+        {/* Top section: Video and Feedback side by side */}
+        <div className="top-section">
+          {/* Video Section - Left */}
+          <section className="video-section">
+            <h2>📹 Your Presentation</h2>
+            <div className="video-container">
+              {videoStream ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="presentation-video"
+                />
+              ) : (
+                <div className="video-placeholder">
+                  <div className="placeholder-icon">📹</div>
+                  <p>Click "Start Presentation" to begin video</p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Feedback Section - Right */}
+          <section className="feedback-section">
+            <h2>📊 Real-time Feedback</h2>
+            {liveFeedback && (
+              <div className="live-feedback">
+                <h3>🔄 Live Analysis</h3>
+                {renderMetrics(liveFeedback)}
+              </div>
+            )}
+
+            {finalAnalysis && (
+              <div className="final-analysis">
+                <h3>✅ Final Analysis</h3>
+                {renderMetrics(finalAnalysis)}
+
+                {finalAnalysis.followUpQuestions &&
+                  finalAnalysis.followUpQuestions.length > 0 && (
+                    <div className="followup-questions">
+                      <h4>💭 Suggested Follow-up Questions</h4>
+                      <ul>
+                        {finalAnalysis.followUpQuestions.map(
+                          (question, index) => (
+                            <li key={index}>{question}</li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  )}
+              </div>
+            )}
+            
+            {!liveFeedback && !finalAnalysis && (
+              <div className="feedback-placeholder">
+                <div className="placeholder-icon">📊</div>
+                <p>Start presenting to see real-time feedback</p>
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Bottom section: Transcript */}
         <section className="transcript-section">
           <h2>📝 Live Transcript</h2>
           <div className="transcript-content">
             {transcript || "Start speaking to see your transcript here..."}
           </div>
-        </section>
-
-        <section className="feedback-section">
-          <h2>📊 Real-time Feedback</h2>
-          {liveFeedback && (
-            <div className="live-feedback">
-              <h3>🔄 Live Analysis</h3>
-              {renderMetrics(liveFeedback)}
-            </div>
-          )}
-
-          {finalAnalysis && (
-            <div className="final-analysis">
-              <h3>✅ Final Analysis</h3>
-              {renderMetrics(finalAnalysis)}
-
-              {finalAnalysis.followUpQuestions &&
-                finalAnalysis.followUpQuestions.length > 0 && (
-                  <div className="followup-questions">
-                    <h4>💭 Suggested Follow-up Questions</h4>
-                    <ul>
-                      {finalAnalysis.followUpQuestions.map(
-                        (question, index) => (
-                          <li key={index}>{question}</li>
-                        ),
-                      )}
-                    </ul>
-                  </div>
-                )}
-            </div>
-          )}
         </section>
       </div>
     </div>
