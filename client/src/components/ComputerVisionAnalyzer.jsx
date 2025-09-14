@@ -28,6 +28,8 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
   useEffect(() => {
     const initializeMediaPipe = async () => {
       try {
+        console.log('Initializing MediaPipe models...');
+        
         // Initialize Face Mesh for eye tracking
         const faceMesh = new FaceMesh({
           locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
@@ -69,6 +71,7 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
         // Set up face mesh results
         faceMesh.onResults((results) => {
           if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+            console.log('Face detected, analyzing eye contact...');
             analyzeEyeContact(results.multiFaceLandmarks[0]);
           }
         });
@@ -76,6 +79,7 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
         // Set up pose results
         pose.onResults((results) => {
           if (results.poseLandmarks) {
+            console.log('Pose detected, analyzing body language...');
             analyzeBodyLanguage(results.poseLandmarks);
           }
         });
@@ -83,6 +87,7 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
         // Set up hands results
         hands.onResults((results) => {
           if (results.multiHandLandmarks) {
+            console.log('Hands detected, analyzing gestures...');
             analyzeHandGestures(results.multiHandLandmarks);
           }
         });
@@ -91,6 +96,7 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
         poseRef.current = pose;
         handsRef.current = hands;
 
+        console.log('MediaPipe models initialized successfully');
         setIsInitialized(true);
       } catch (error) {
         console.error('Error initializing MediaPipe:', error);
@@ -101,53 +107,79 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
   }, []);
 
   const analyzeEyeContact = (landmarks) => {
-    if (!landmarks) return;
+    if (!landmarks || landmarks.length < 468) return;
 
-    // Key eye landmarks (approximate indices for MediaPipe Face Mesh)
-    const leftEyeInner = landmarks[33];
-    const leftEyeOuter = landmarks[133];
-    const rightEyeInner = landmarks[362];
-    const rightEyeOuter = landmarks[263];
-    const noseTip = landmarks[1];
+    // More accurate eye landmarks for MediaPipe Face Mesh
+    // Left eye landmarks
+    const leftEyeInner = landmarks[133];  // Left eye inner corner
+    const leftEyeOuter = landmarks[33];   // Left eye outer corner
+    const leftEyeTop = landmarks[159];    // Left eye top
+    const leftEyeBottom = landmarks[145]; // Left eye bottom
+    
+    // Right eye landmarks  
+    const rightEyeInner = landmarks[362]; // Right eye inner corner
+    const rightEyeOuter = landmarks[263]; // Right eye outer corner
+    const rightEyeTop = landmarks[386];   // Right eye top
+    const rightEyeBottom = landmarks[374]; // Right eye bottom
 
-    // Calculate eye center points
+    // Calculate eye center points more accurately
     const leftEyeCenter = {
-      x: (leftEyeInner.x + leftEyeOuter.x) / 2,
-      y: (leftEyeInner.y + leftEyeOuter.y) / 2
+      x: (leftEyeInner.x + leftEyeOuter.x + leftEyeTop.x + leftEyeBottom.x) / 4,
+      y: (leftEyeInner.y + leftEyeOuter.y + leftEyeTop.y + leftEyeBottom.y) / 4
     };
 
     const rightEyeCenter = {
-      x: (rightEyeInner.x + rightEyeOuter.x) / 2,
-      y: (rightEyeInner.y + rightEyeOuter.y) / 2
+      x: (rightEyeInner.x + rightEyeOuter.x + rightEyeTop.x + rightEyeBottom.x) / 4,
+      y: (rightEyeInner.y + rightEyeOuter.y + rightEyeTop.y + rightEyeBottom.y) / 4
     };
 
-    // Calculate gaze direction relative to camera
+    // Calculate overall eye center
     const eyeCenterX = (leftEyeCenter.x + rightEyeCenter.x) / 2;
     const eyeCenterY = (leftEyeCenter.y + rightEyeCenter.y) / 2;
 
-    // Determine if looking at camera (center of frame)
-    const centerThreshold = 0.1; // 10% tolerance
-    const isLookingAtCamera = Math.abs(eyeCenterX - 0.5) < centerThreshold && 
-                             Math.abs(eyeCenterY - 0.5) < centerThreshold;
+    // Calculate eye contact percentage based on distance from center
+    const centerX = 0.5;
+    const centerY = 0.5;
+    const maxDistance = 0.3; // Maximum distance for 0% eye contact
+    
+    const distanceFromCenter = Math.sqrt(
+      Math.pow(eyeCenterX - centerX, 2) + Math.pow(eyeCenterY - centerY, 2)
+    );
+    
+    // Calculate eye contact percentage (closer to center = higher percentage)
+    const eyeContactPercentage = Math.max(0, Math.min(100, 
+      (1 - distanceFromCenter / maxDistance) * 100
+    ));
 
-    // Determine gaze direction
+    // Determine if looking at camera (more lenient threshold)
+    const centerThreshold = 0.15; // 15% tolerance
+    const isLookingAtCamera = distanceFromCenter < centerThreshold;
+
+    // Determine gaze direction with more nuanced detection
     let gazeDirection = 'center';
-    if (eyeCenterX < 0.3) gazeDirection = 'left';
-    else if (eyeCenterX > 0.7) gazeDirection = 'right';
-    else if (eyeCenterY < 0.3) gazeDirection = 'up';
-    else if (eyeCenterY > 0.7) gazeDirection = 'down';
+    const horizontalDistance = Math.abs(eyeCenterX - centerX);
+    const verticalDistance = Math.abs(eyeCenterY - centerY);
+    
+    if (horizontalDistance > verticalDistance) {
+      if (eyeCenterX < 0.35) gazeDirection = 'left';
+      else if (eyeCenterX > 0.65) gazeDirection = 'right';
+    } else {
+      if (eyeCenterY < 0.35) gazeDirection = 'up';
+      else if (eyeCenterY > 0.65) gazeDirection = 'down';
+    }
 
     const newEyeContactData = {
       isLookingAtCamera,
-      eyeContactPercentage: isLookingAtCamera ? 100 : 0,
+      eyeContactPercentage: Math.round(eyeContactPercentage),
       gazeDirection
     };
 
+    console.log('Eye contact analysis:', newEyeContactData);
     setEyeContactData(newEyeContactData);
   };
 
   const analyzeBodyLanguage = (landmarks) => {
-    if (!landmarks) return;
+    if (!landmarks || landmarks.length < 33) return;
 
     // Key pose landmarks
     const nose = landmarks[0];
@@ -155,8 +187,23 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
     const rightShoulder = landmarks[12];
     const leftHip = landmarks[23];
     const rightHip = landmarks[24];
+    const leftEar = landmarks[7];
+    const rightEar = landmarks[8];
 
-    // Analyze posture
+    // Check if key landmarks are visible
+    const keyLandmarks = [nose, leftShoulder, rightShoulder, leftHip, rightHip];
+    const visibleLandmarks = keyLandmarks.filter(landmark => landmark.visibility > 0.5);
+    
+    if (visibleLandmarks.length < 4) {
+      // Not enough visible landmarks for accurate analysis
+      setBodyLanguageData(prev => ({
+        ...prev,
+        confidence: (visibleLandmarks.length / keyLandmarks.length) * 100
+      }));
+      return;
+    }
+
+    // Analyze posture with multiple metrics
     const shoulderCenter = {
       x: (leftShoulder.x + rightShoulder.x) / 2,
       y: (leftShoulder.y + rightShoulder.y) / 2
@@ -167,20 +214,46 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
       y: (leftHip.y + rightHip.y) / 2
     };
 
-    // Calculate spine alignment
+    const earCenter = {
+      x: (leftEar.x + rightEar.x) / 2,
+      y: (leftEar.y + rightEar.y) / 2
+    };
+
+    // Calculate spine alignment (horizontal deviation)
     const spineAlignment = Math.abs(shoulderCenter.x - hipCenter.x);
+    
+    // Calculate head alignment with shoulders
+    const headAlignment = Math.abs(earCenter.x - shoulderCenter.x);
+    
+    // Calculate overall posture score
+    let postureScore = 100;
+    
+    // Deduct points for spine misalignment
+    if (spineAlignment > 0.08) postureScore -= 40;
+    else if (spineAlignment > 0.05) postureScore -= 20;
+    else if (spineAlignment > 0.03) postureScore -= 10;
+    
+    // Deduct points for head misalignment
+    if (headAlignment > 0.06) postureScore -= 30;
+    else if (headAlignment > 0.04) postureScore -= 15;
+    else if (headAlignment > 0.02) postureScore -= 5;
+
+    // Determine posture category
     let posture = 'good';
-    if (spineAlignment > 0.1) posture = 'slouched';
-    else if (spineAlignment > 0.05) posture = 'slightly_off';
+    if (postureScore < 50) posture = 'slouched';
+    else if (postureScore < 75) posture = 'slightly_off';
 
-    // Calculate confidence (based on landmark visibility)
-    const confidence = landmarks.filter(landmark => landmark.visibility > 0.5).length / landmarks.length;
+    // Calculate confidence (based on landmark visibility and consistency)
+    const confidence = (visibleLandmarks.length / keyLandmarks.length) * 100;
 
-    setBodyLanguageData(prev => ({
-      ...prev,
+    const newBodyLanguageData = {
+      ...bodyLanguageData,
       posture,
-      confidence: confidence * 100
-    }));
+      confidence: Math.round(confidence)
+    };
+
+    console.log('Body language analysis:', newBodyLanguageData);
+    setBodyLanguageData(newBodyLanguageData);
   };
 
   const analyzeHandGestures = (handLandmarks) => {
@@ -214,45 +287,60 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
   };
 
   const processFrame = async () => {
-    if (!isInitialized || !videoRef.current || !canvasRef.current) return;
+    if (!isInitialized || !videoRef.current || !canvasRef.current) {
+      console.log('Skipping frame - not ready:', { isInitialized, hasVideo: !!videoRef.current, hasCanvas: !!canvasRef.current });
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
+    // Check if video is ready
+    if (video.readyState < 2) {
+      console.log('Video not ready, readyState:', video.readyState);
+      return; // Not enough data loaded
+    }
+
     // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth || 320;
+    canvas.height = video.videoHeight || 240;
 
     // Draw video frame to canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // Process with MediaPipe
-    if (faceMeshRef.current) {
-      await faceMeshRef.current.send({ image: canvas });
-    }
+    try {
+      if (faceMeshRef.current) {
+        await faceMeshRef.current.send({ image: canvas });
+      }
 
-    if (poseRef.current) {
-      await poseRef.current.send({ image: canvas });
-    }
+      if (poseRef.current) {
+        await poseRef.current.send({ image: canvas });
+      }
 
-    if (handsRef.current) {
-      await handsRef.current.send({ image: canvas });
+      if (handsRef.current) {
+        await handsRef.current.send({ image: canvas });
+      }
+    } catch (error) {
+      console.error('Error processing frame:', error);
     }
+  };
 
-    // Send combined analysis to parent
+  // Update parent with current analysis data whenever it changes
+  useEffect(() => {
     onAnalysisUpdate({
       eyeContact: eyeContactData,
       bodyLanguage: bodyLanguageData
     });
-  };
+  }, [eyeContactData, bodyLanguageData, onAnalysisUpdate]);
 
   useEffect(() => {
     if (isInitialized && videoRef.current) {
-      const interval = setInterval(processFrame, 100); // Process every 100ms
+      const interval = setInterval(processFrame, 200); // Process every 200ms for better performance
       return () => clearInterval(interval);
     }
-  }, [isInitialized, eyeContactData, bodyLanguageData]);
+  }, [isInitialized]);
 
   return (
     <canvas
