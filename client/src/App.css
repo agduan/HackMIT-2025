@@ -93,6 +93,7 @@ header p {
     color: black;
     border: 1px solid #ccc; /* thin gray border */
     border-radius: 12px;
+    min-width: 224px;
 }
 
 .start-btn:hover:not(.disabled) {
@@ -100,6 +101,7 @@ header p {
     transform: translateY(-2px);
     color: white;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    min-width: 224px;
 }
 
 .stop-btn {
