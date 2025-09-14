@@ -6,6 +6,13 @@ export default defineConfig({
   plugins: [react()],
   root: './client',
   build: {
-    outDir: '../dist'
+    outDir: '../dist',
+    rollupOptions: {
+      external: [
+        '@mediapipe/face_mesh',
+        '@mediapipe/pose', 
+        '@mediapipe/hands'
+      ]
+    }
   }
 })

@@ -1,7 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
-import { FaceMesh } from '@mediapipe/face_mesh';
-import { Pose } from '@mediapipe/pose';
-import { Hands } from '@mediapipe/hands';
+
+// Use global MediaPipe objects loaded from CDN
+const { FaceMesh } = window;
+const { Pose } = window;
+const { Hands } = window;
 
 const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true }) => {
   const canvasRef = useRef(null);
@@ -31,6 +33,13 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
   useEffect(() => {
     const initializeMediaPipe = async () => {
       try {
+        // Check if MediaPipe is available
+        if (!window.FaceMesh || !window.Pose || !window.Hands) {
+          console.log('MediaPipe not yet loaded, retrying in 100ms...');
+          setTimeout(initializeMediaPipe, 100);
+          return;
+        }
+
         console.log('Initializing MediaPipe models...');
         
         // Initialize Face Mesh for eye tracking
