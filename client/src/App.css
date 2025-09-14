@@ -327,6 +327,12 @@ header p {
     backdrop-filter: blur(10px);
 }
 
+.feedback-section {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
 .video-section h2,
 .transcript-section h2,
 .feedback-section h2 {
@@ -366,6 +372,7 @@ header p {
     height: 100%;
     color: #666;
     text-align: center;
+    flex: 1;
 }
 
 .placeholder-icon {
@@ -649,6 +656,123 @@ header p {
     background: #5a6fd8;
 }
 
+/* Vision Metrics Styles */
+.vision-metrics {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  margin-top: 20px;
+}
+
+.vision-metrics h3 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.5rem;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.analysis-status {
+  font-size: 0.8rem;
+  font-weight: normal;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-left: 10px;
+}
+
+.analysis-status.active {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.analysis-status.frozen {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+  border: 1px solid rgba(158, 158, 158, 0.3);
+}
+
+.vision-metrics .metrics-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.vision-metrics .metric-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid #667eea;
+  flex: 1;
+}
+
+.vision-metrics .metric-card h4 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.vision-metrics .metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 10px;
+}
+
+.vision-metrics .metric-details p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.vision-feedback {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.vision-feedback h4 {
+  color: white;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.feedback-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feedback-tips .tip {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin: 0;
+  font-size: 0.9rem;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.feedback-tips .tip.warning {
+  border-left: 4px solid #ffc107;
+}
+
+.feedback-tips .tip.info {
+  border-left: 4px solid #17a2b8;
+}
+
+.feedback-tips .tip.success {
+  border-left: 4px solid #28a745;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .app-container {
@@ -656,6 +780,11 @@ header p {
         max-width: 1200px;
         width: 100%;
         padding: 15px;
+    }
+    
+    .vision-metrics .metrics-row {
+        flex-direction: column;
+        gap: 15px;
     }
 
     header h1 {

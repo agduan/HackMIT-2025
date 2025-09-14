@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
+import ComputerVisionAnalyzer from "./components/ComputerVisionAnalyzer";
+import VisionMetrics from "./components/VisionMetrics";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:4000";
 const socket = io(SOCKET_URL);
@@ -17,6 +19,19 @@ function App() {
   const [selectedAnalysisType, setSelectedAnalysisType] = useState("general");
   const [isWaitingForFirstFeedback, setIsWaitingForFirstFeedback] =
     useState(false);
+  const [visionAnalysis, setVisionAnalysis] = useState({
+    eyeContact: {
+      isLookingAtCamera: false,
+      eyeContactPercentage: 0,
+      gazeDirection: 'center'
+    },
+    bodyLanguage: {
+      posture: 'good',
+      handGestures: 0,
+      movement: 'minimal',
+      confidence: 0
+    }
+  });
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -50,7 +65,7 @@ function App() {
     });
 
     socket.on("transcription-error", (data) => {
-      //setError(`Transcription error: ${data.message}`);
+      setError(`Transcription error: ${data.message}`);
       setIsWaitingForFirstFeedback(false);
     });
 
@@ -71,6 +86,11 @@ function App() {
   useEffect(() => {
     socket.emit("set-analysis-type", { analysisType: selectedAnalysisType });
   }, [selectedAnalysisType]);
+
+  // Handle vision analysis updates
+  const handleVisionAnalysis = (analysis) => {
+    setVisionAnalysis(analysis);
+  };
 
   const startRecording = async () => {
     try {
@@ -464,17 +484,24 @@ function App() {
                   <p>Video feedback turned off</p>
                 </div>
               ) : videoStream ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className="presentation-video"
-                  onLoadedMetadata={() => console.log("Video metadata loaded")}
-                  onCanPlay={() => console.log("Video can play")}
-                  onError={(e) => console.error("Video error:", e)}
-                  onLoadStart={() => console.log("Video load started")}
-                />
+                <>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="presentation-video"
+                    onLoadedMetadata={() => console.log("Video metadata loaded")}
+                    onCanPlay={() => console.log("Video can play")}
+                    onError={(e) => console.error("Video error:", e)}
+                    onLoadStart={() => console.log("Video load started")}
+                  />
+                  <ComputerVisionAnalyzer 
+                    videoRef={videoRef} 
+                    onAnalysisUpdate={handleVisionAnalysis}
+                    isActive={isRecording}
+                  />
+                </>
               ) : (
                 <div className="video-placeholder">
                   <div className="placeholder-icon">Video</div>
@@ -482,6 +509,15 @@ function App() {
                 </div>
               )}
             </div>
+
+            {/* Vision Analysis - Show when video is enabled and recording, or when stopped with final analysis */}
+            {videoFeedbackEnabled && (isRecording || finalAnalysis) && (
+              <VisionMetrics 
+                eyeContactData={visionAnalysis.eyeContact}
+                bodyLanguageData={visionAnalysis.bodyLanguage}
+                isActive={isRecording}
+              />
+            )}
           </section>
 
           {/* Feedback Section - Right */}
