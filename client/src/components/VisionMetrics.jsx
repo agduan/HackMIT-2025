@@ -34,47 +34,50 @@ const VisionMetrics = ({ eyeContactData, bodyLanguageData }) => {
     <div className="vision-metrics">
       <h3>Visual Analysis</h3>
       
-      {/* Eye Contact Metrics */}
-      <div className="metric-card eye-contact">
-        <h4>👁️ Eye Contact</h4>
-        <div className="metric-value">
-          {eyeContactData.eyeContactPercentage.toFixed(0)}%
+      {/* Metrics side by side */}
+      <div className="metrics-row">
+        {/* Eye Contact Metrics */}
+        <div className="metric-card eye-contact">
+          <h4>Eye Contact</h4>
+          <div className="metric-value">
+            {eyeContactData.eyeContactPercentage.toFixed(0)}%
+          </div>
+          <div className="metric-details">
+            <p><strong>Status:</strong> {getGazeDirectionText(eyeContactData.gazeDirection)}</p>
+            <p><strong>Looking at camera:</strong> {eyeContactData.isLookingAtCamera ? 'Yes' : 'No'}</p>
+          </div>
         </div>
-        <div className="metric-details">
-          <p><strong>Status:</strong> {getGazeDirectionText(eyeContactData.gazeDirection)}</p>
-          <p><strong>Looking at camera:</strong> {eyeContactData.isLookingAtCamera ? 'Yes' : 'No'}</p>
-        </div>
-      </div>
 
-      {/* Body Language Metrics */}
-      <div className="metric-card body-language">
-        <h4>🤸 Body Language</h4>
-        <div className="metric-details">
-          <p><strong>Posture:</strong> 
-            <span style={{ color: getPostureColor(bodyLanguageData.posture) }}>
-              {getPostureText(bodyLanguageData.posture)}
-            </span>
-          </p>
-          <p><strong>Hand Gestures:</strong> {bodyLanguageData.handGestures} active</p>
-          <p><strong>Confidence:</strong> {bodyLanguageData.confidence.toFixed(0)}%</p>
+        {/* Body Language Metrics */}
+        <div className="metric-card body-language">
+          <h4>Body Language</h4>
+          <div className="metric-details">
+            <p><strong>Posture:</strong> 
+              <span style={{ color: getPostureColor(bodyLanguageData.posture) }}>
+                {getPostureText(bodyLanguageData.posture)}
+              </span>
+            </p>
+            <p><strong>Hand Gestures:</strong> {bodyLanguageData.handGestures} active</p>
+            <p><strong>Confidence:</strong> {bodyLanguageData.confidence.toFixed(0)}%</p>
+          </div>
         </div>
       </div>
 
       {/* Real-time Feedback */}
       <div className="vision-feedback">
-        <h4>💡 Real-time Tips</h4>
+        <h4>Real-time Tips</h4>
         <div className="feedback-tips">
           {eyeContactData.eyeContactPercentage < 30 && (
-            <p className="tip warning">⚠️ Try to look at the camera more often</p>
+            <p className="tip warning">Try to look at the camera more often</p>
           )}
           {bodyLanguageData.posture === 'slouched' && (
-            <p className="tip warning">⚠️ Straighten your posture</p>
+            <p className="tip warning">Straighten your posture</p>
           )}
           {bodyLanguageData.handGestures === 0 && (
-            <p className="tip info">💡 Consider using hand gestures to emphasize points</p>
+            <p className="tip info">Consider using hand gestures to emphasize points</p>
           )}
           {eyeContactData.eyeContactPercentage > 70 && bodyLanguageData.posture === 'good' && (
-            <p className="tip success">✅ Great eye contact and posture!</p>
+            <p className="tip success">Great eye contact and posture!</p>
           )}
         </div>
       </div>

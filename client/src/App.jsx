@@ -478,6 +478,14 @@ function App() {
                 </div>
               )}
             </div>
+
+            {/* Vision Analysis - Only show when video is enabled and recording */}
+            {videoFeedbackEnabled && isRecording && (
+              <VisionMetrics 
+                eyeContactData={visionAnalysis.eyeContact}
+                bodyLanguageData={visionAnalysis.bodyLanguage}
+              />
+            )}
           </section>
 
           {/* Feedback Section - Right */}
@@ -527,14 +535,6 @@ function App() {
                 <div className="placeholder-icon">Feedback</div>
                 <p>Start presenting to see real-time feedback</p>
               </div>
-            )}
-
-            {/* Vision Analysis - Only show when video is enabled and recording */}
-            {videoFeedbackEnabled && isRecording && (
-              <VisionMetrics 
-                eyeContactData={visionAnalysis.eyeContact}
-                bodyLanguageData={visionAnalysis.bodyLanguage}
-              />
             )}
           </section>
         </div>
