@@ -27,16 +27,16 @@ function getCustomPromptForAnalysisType(analysisType) {
 2. Communication effectiveness
 3. Areas for improvement
 4. Strengths to maintain
-Provide specific, actionable advice in 2-3 sentences.
-Address the presenter directly in second person.`,
+Address the presenter in second person.
+Provide specific, actionable advice in 2-3 sentences per category:`,
 
     teaching: `Analyze this teaching session and provide constructive feedback. Focus on:
 1. Content clarity and structure
 2. Communication effectiveness
 3. Areas for improvement
 4. Strengths to maintain
-Provide specific, actionable advice in 2-3 sentences.
-Address the presenter directly in second person.`,
+Address the presenter in second person.
+Provide specific, actionable advice in 2-3 sentences per category:`,
 
     interview: `The following transcript is from an interview. Evaluate the candidate based on:
 1. Communication skills
@@ -44,8 +44,8 @@ Address the presenter directly in second person.`,
 3. Ability to handle pressure
 4. Adaptability and flexibility
 5. Problem-solving skills
-Provide specific, actionable advice in 2-3 sentences.
-Address the presenter directly in second person.`,
+Address the presenter in second person.
+Provide specific, actionable advice in 2-3 sentences per category`,
   };
 
   return prompts[analysisType] || prompts.general;
