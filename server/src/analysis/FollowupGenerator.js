@@ -4,18 +4,18 @@
 const DEFAULT_MODEL = "gpt-3.5-turbo"; // keep your existing model; upgrade later if you want
 
 const MODE_PRESETS = {
-  general: `Write probing, respectful questions that:
+  general: `Write a few probing, respectful questions that:
 - Clarify assumptions/definitions/scope
 - Pressure-test evidence, metrics, and tradeoffs
 - Identify risks/unknowns/stakeholders
 - Drive next steps and accountability
 Keep each under 18 words.`,
-  teaching: `Write learner-centered questions that:
+  teaching: `Write a few learner-centered questions that:
 - Elicit reasoning and misconceptions
 - Connect concepts to examples and edge cases
 - Scaffold reflection and self-explanation
 Keep each under 18 words.`,
-  interview: `Write interviewer-style questions that:
+  interview: `Write a few interviewer-style questions that:
 - Probe impact, decisions, constraints, and alternatives
 - Ask for quantification and personal contribution
 - Surface failure modes and next steps
