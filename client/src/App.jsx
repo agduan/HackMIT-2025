@@ -264,7 +264,20 @@ function App() {
 
   return (
     <div className="app-container">
-      <header>
+      <header style={{ position: 'relative' }}>
+        {/* LOGO: Added img for Socrates next to header */}
+        <img 
+          src="/logo_blue.svg" 
+          alt="Socrates Logo" 
+          style={{ 
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-280px, -50%)',
+            width: '80px', 
+            height: '80px' 
+          }} 
+        />
         <h1
           style={{
             fontFamily: "Georgia, Times New Roman, serif",
@@ -272,6 +285,8 @@ function App() {
             fontWeight: 300,
             fontSize: "3em",
             letterSpacing: "0.02em",
+            textAlign: "left", // TODO
+            marginLeft: "240px" // TODO
           }}
         >
           Ok, Socrates
@@ -281,6 +296,8 @@ function App() {
             fontSize: "1em",
             color: "#888",
             marginTop: "-0.5em",
+            marginLeft: "240px", // TODO
+            textAlign: "left", // TODO
             fontFamily:
               'SF Pro, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
           }}
