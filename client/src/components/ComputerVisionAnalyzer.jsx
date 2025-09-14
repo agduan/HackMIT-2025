@@ -30,10 +30,38 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
       try {
         console.log('Loading MediaPipe modules...');
         
-        // Dynamically import MediaPipe modules
-        const { FaceMesh } = await import('@mediapipe/face_mesh');
-        const { Pose } = await import('@mediapipe/pose');
-        const { Hands } = await import('@mediapipe/hands');
+        // Check if we're in a browser environment that supports MediaPipe
+        if (typeof window === 'undefined') {
+          console.log('Not in browser environment, skipping MediaPipe initialization');
+          return;
+        }
+        
+        // Load MediaPipe from CDN
+        if (!window.FaceMesh || !window.Pose || !window.Hands) {
+          console.log('MediaPipe not available, loading from CDN...');
+          // Load MediaPipe scripts dynamically
+          const loadScript = (src) => new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+          
+          try {
+            await Promise.all([
+              loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js'),
+              loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js'),
+              loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js')
+            ]);
+          } catch (cdnError) {
+            console.warn('Failed to load MediaPipe from CDN:', cdnError);
+            console.log('Continuing without computer vision features');
+            return;
+          }
+        }
+        
+        const { FaceMesh, Pose, Hands } = window;
 
         console.log('Initializing MediaPipe models...');
         
