@@ -1,10 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
 
-// Use global MediaPipe objects loaded from CDN
-const { FaceMesh } = window;
-const { Pose } = window;
-const { Hands } = window;
-
 const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true }) => {
   const canvasRef = useRef(null);
   const faceMeshRef = useRef(null);
@@ -33,12 +28,12 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
   useEffect(() => {
     const initializeMediaPipe = async () => {
       try {
-        // Check if MediaPipe is available
-        if (!window.FaceMesh || !window.Pose || !window.Hands) {
-          console.log('MediaPipe not yet loaded, retrying in 100ms...');
-          setTimeout(initializeMediaPipe, 100);
-          return;
-        }
+        console.log('Loading MediaPipe modules...');
+        
+        // Dynamically import MediaPipe modules
+        const { FaceMesh } = await import('@mediapipe/face_mesh');
+        const { Pose } = await import('@mediapipe/pose');
+        const { Hands } = await import('@mediapipe/hands');
 
         console.log('Initializing MediaPipe models...');
         
