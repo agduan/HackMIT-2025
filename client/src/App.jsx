@@ -50,7 +50,7 @@ function App() {
     });
 
     socket.on("transcription-error", (data) => {
-      setError(`Transcription error: ${data.message}`);
+      //setError(`Transcription error: ${data.message}`);
       setIsWaitingForFirstFeedback(false);
     });
 
