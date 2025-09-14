@@ -166,10 +166,10 @@ io.on("connection", (socket) => {
       })
       .on("error", (error) => {
         console.error("Google Cloud Speech error:", error);
-        socket.emit("transcription-error", {
-          message: "Speech recognition error occurred",
-          error: error.message,
-        });
+        // socket.emit("transcription-error", {
+        //   message: "Speech recognition error occurred",
+        //   error: error.message,
+        // });
 
         // Restart the stream after a brief delay
         setTimeout(() => {
