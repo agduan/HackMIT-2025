@@ -50,7 +50,7 @@ function App() {
     });
 
     socket.on("transcription-error", (data) => {
-      //setError(`Transcription error: ${data.message}`);
+      setError(`Transcription error: ${data.message}`);
       setIsWaitingForFirstFeedback(false);
     });
 
@@ -155,7 +155,10 @@ function App() {
 
       // Create MediaRecorder with only audio track to avoid conflicts
       const audioOnlyStream = new MediaStream([stream.getAudioTracks()[0]]);
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+      const mediaRecorder = new MediaRecorder(
+        audioOnlyStream,
+        mimeType ? { mimeType } : {},
+      );
       mediaRecorderRef.current = mediaRecorder;
 
       // Store the full stream reference for cleanup
