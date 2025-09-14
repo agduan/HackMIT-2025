@@ -1,5 +1,5 @@
 # Ok, Socrates: Your Live Presentation Coach
-**Ok, Socrates** is a real-time presentation analyzer and note-taker web app. It transcribes and provides instant feedback on speaking pace, filler words, pauses, sentiment, eye contact, and posture during live presentations.
+**Ok, Socrates** is a real-time presentation analyzer and note-taker web app. It transcribes and provides instant feedback both on verbal and visual aspects of your presentation. More specifically, it will judge on speaking pace, filler words, pauses, readability, eye contact, and posture during live presentations.
 
 This was made for the education track at HackMIT 2025 and the Wispr Sponsor Challenge.
 
@@ -11,12 +11,13 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
   - Speaking pace (WPM analysis)
   - Filler word detection and percentage
   - Pause analysis
-  - Sentiment analysis
+  - Readability analysis
   - Eye contact tracking and percentage
   - Posture analysis and body language
-- **Visual Feedback**: Beautiful, intuitive UI with color-coded metrics
-- **Follow-up Questions**: AI-generated questions based on your presentation content
-- **Final Analysis**: Complete report at the end of your presentation
+- **Visual Feedback**: Uses MediaPipe to analyze face and pose detection, and hand tracking
+- **Intuitive UI**: Beautiful, intuitive UI with color-coded metrics
+- **Follow-up Questions**: Uses OpenAI API for specific and thorough questions based on your presentation content
+- **Final Analysis**: Complete report at the end of your presentation, including AI-generated feedback
 
 ## Quick Start
 
@@ -25,6 +26,7 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
 - Node.js (v16 or higher)
 - Google Cloud Speech-to-Text API
 - OpenAI API
+- MediaPipe/face_mesh
 
 ### Installation
 
