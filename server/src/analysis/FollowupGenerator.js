@@ -9,17 +9,17 @@ const MODE_PRESETS = {
 - Pressure-test evidence, metrics, and tradeoffs
 - Identify risks/unknowns/stakeholders
 - Drive next steps and accountability
-Keep each under 18 words.`,
+Keep each under 18 words. Limit to 5 questions at most.`,
   teaching: `Write a few learner-centered questions that:
 - Elicit reasoning and misconceptions
 - Connect concepts to examples and edge cases
 - Scaffold reflection and self-explanation
-Keep each under 18 words.`,
+Keep each under 18 words. Limit to 5 questions at most.`,
   interview: `Write a few interviewer-style questions that:
 - Probe impact, decisions, constraints, and alternatives
 - Ask for quantification and personal contribution
 - Surface failure modes and next steps
-Keep each under 18 words.`,
+Keep each under 18 words. Limit to 5 questions at most.`,
 };
 
 function chunkWindows(transcriptWords, windowSec = 20, maxChars = 500) {
