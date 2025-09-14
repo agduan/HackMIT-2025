@@ -289,13 +289,14 @@ function App() {
           }}
         >
           <img
-            src="/logo_blue.svg"
-            alt="Socrates Logo"
+            src={isRecording ? "/logo_thinking.png" : "/logo_blue.svg"}
+            alt={isRecording ? "Socrates Thinking" : "Socrates Logo"}
             style={{
               width: "80px",
               height: "80px",
               flexShrink: 0,
               marginTop: "2em",
+              objectFit: "contain",
             }}
           />
           <div style={{ textAlign: "left" }}>
