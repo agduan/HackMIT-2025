@@ -1,5 +1,5 @@
 # Ok, Socrates: A Live Presentation Coach
-Ok, Socrates is a real-time presentation analyzer and note taker web app. It will transcribe and provide instant feedback on speaking pace, filler words, pauses, and sentiment during live presentations.
+Ok, Socrates is a real-time presentation analyzer and note taker web app. It will transcribe and provide instant feedback on speaking pace, filler words, pauses, sentiment, eye contact, and posture during live presentations.
 
 This was made for the education track at HackMIT 2025 and the Wispr Sponsor Challenge.
 
@@ -12,6 +12,8 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
   - Filler word detection and percentage
   - Pause analysis
   - Sentiment analysis
+  - Eye contact tracking and percentage
+  - Posture analysis and body language
 - **Visual Feedback**: Beautiful, intuitive UI with color-coded metrics
 - **Follow-up Questions**: AI-generated questions based on your presentation content
 - **Final Analysis**: Complete report at the end of your presentation
@@ -40,6 +42,7 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
    # Install client dependencies
    cd client
    npm install socket.io-client
+   npm install @mediapipe/face_mesh @mediapipe/pose @mediapipe/hands
 
    # Install server dependencies
    cd ../server
@@ -86,10 +89,11 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
 
 3. **Open your browser**
    - Navigate to `http://localhost:5173`
-   - Allow microphone permissions when prompted
+   - Allow microphone and camera permissions when prompted
+   - Enable "Video Feedback" for visual analysis
    - Click "Start Presentation" to begin!
 
-## 🎯 How to Use
+## How to Use
 
 1. **Start Recording**: Click the "Start Presentation" button
 2. **Speak Naturally**: The app will transcribe your speech in real-time
@@ -97,7 +101,7 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
 4. **Stop & Analyze**: Click "Stop & Analyze" for a final comprehensive report
 5. **Review Results**: Check your metrics and suggested follow-up questions
 
-## 📊 Metrics Explained
+## Metrics Explained
 
 ### Speaking Pace
 - **Good**: 110-160 WPM (words per minute)
@@ -113,17 +117,27 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
 - **Good**: Few long pauses (effective use of silence)
 - **Needs Improvement**: Many long pauses (may indicate hesitation)
 
+### Eye Contact
+- **Good**: 70%+ eye contact with camera
+- **Needs Improvement**: <30% eye contact (try looking at camera more)
+
+### Posture
+- **Excellent**: Straight spine, centered head alignment
+- **Good**: Minor deviations from ideal posture
+- **Needs Improvement**: Slouched or significantly misaligned posture
+
 ### AI-Powered Feedback
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React 19, Vite, Socket.IO Client
 - **Backend**: Node.js, Express, Socket.IO
 - **Speech-to-Text**: Wispr API
+- **Computer Vision**: MediaPipe (Face Mesh, Pose, Hands)
 - **Analysis**: Custom JavaScript presentation analyzer
 - **Styling**: Modern CSS with gradients and animations
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 HackMIT-2025/
@@ -131,6 +145,9 @@ HackMIT-2025/
 │   ├── src/
 │   │   ├── App.jsx        # Main React component
 │   │   ├── App.css        # Styling
+│   │   ├── components/
+│   │   │   ├── ComputerVisionAnalyzer.jsx  # Visual analysis
+│   │   │   └── VisionMetrics.jsx           # Visual metrics display
 │   │   └── main.jsx       # Entry point
 │   └── package.json
 ├── server/                 # Express backend
@@ -143,12 +160,13 @@ HackMIT-2025/
 └── README.md
 ```
 
-## 🎨 Features in Detail
+## Features in Detail
 
 ### Real-time Analysis
 - Processes audio chunks every 250ms
 - Sends feedback every 5 seconds during presentation
 - Provides immediate visual feedback with color-coded metrics
+- Analyzes video frames every 150ms for eye contact and posture
 
 ### Presentation Analyzer
 - **Pacing Analysis**: Calculates words per minute and provides feedback
@@ -164,7 +182,7 @@ HackMIT-2025/
 - Live recording indicator with pulsing animation
 - Clean, intuitive interface
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -178,7 +196,12 @@ HackMIT-2025/
    - Check server console for errors
    - Ensure you're speaking clearly and loudly enough
 
-3. **Server connection issues**
+3. **Visual analysis not working**
+   - Ensure camera permissions are granted
+   - Check that "Video Feedback" is enabled
+   - Verify MediaPipe models are loading (check browser console)
+
+4. **Server connection issues**
    - Make sure the server is running on port 4000
    - Check that VITE_SOCKET_URL matches your server URL
    - Verify no firewall is blocking the connection
@@ -189,18 +212,18 @@ HackMIT-2025/
 - Check the server console for backend errors
 - Ensure all dependencies are installed correctly
 
-## 🏆 HackMIT 2025 - Wispr Challenge
+## HackMIT 2025 - Wispr Challenge
 
 This project was built for the Wispr Challenge at HackMIT 2025:
-- **Challenge**: "Yap ur App 🎤" - Use speech-to-text creatively
+- **Challenge**: "Yap ur App" - Use speech-to-text creatively
 - **Track**: Education
 - **API**: Wispr Flow for speech-to-text
 - **Goal**: Help students improve their presentation skills
 
-## 📝 License
+## License
 
 This project is created for HackMIT 2025. Feel free to use and modify for educational purposes.
 
 ---
 
-**Happy Presenting! 🎤✨**
+**Happy Presenting!**
