@@ -54,7 +54,7 @@ const VisionMetrics = ({ eyeContactData, bodyLanguageData }) => {
           <div className="metric-details">
             <p><strong>Posture:</strong> 
               <span style={{ color: getPostureColor(bodyLanguageData.posture) }}>
-                {getPostureText(bodyLanguageData.posture)}
+                {' '}{getPostureText(bodyLanguageData.posture)}
               </span>
             </p>
             <p><strong>Hand Gestures:</strong> {bodyLanguageData.handGestures} active</p>

@@ -25,6 +25,9 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
     confidence: 0
   });
 
+  // Store previous landmarks for movement detection
+  const [previousLandmarks, setPreviousLandmarks] = useState(null);
+
   useEffect(() => {
     const initializeMediaPipe = async () => {
       try {
@@ -194,11 +197,11 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
     const keyLandmarks = [nose, leftShoulder, rightShoulder, leftHip, rightHip];
     const visibleLandmarks = keyLandmarks.filter(landmark => landmark.visibility > 0.5);
     
-    if (visibleLandmarks.length < 4) {
+    if (visibleLandmarks.length < 3) {
       // Not enough visible landmarks for accurate analysis
       setBodyLanguageData(prev => ({
         ...prev,
-        confidence: (visibleLandmarks.length / keyLandmarks.length) * 100
+        confidence: Math.round((visibleLandmarks.length / keyLandmarks.length) * 100)
       }));
       return;
     }
@@ -219,40 +222,85 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
       y: (leftEar.y + rightEar.y) / 2
     };
 
-    // Calculate spine alignment (horizontal deviation)
+    // Calculate spine alignment (horizontal deviation) - more sensitive
     const spineAlignment = Math.abs(shoulderCenter.x - hipCenter.x);
     
-    // Calculate head alignment with shoulders
+    // Calculate head alignment with shoulders - more sensitive
     const headAlignment = Math.abs(earCenter.x - shoulderCenter.x);
     
-    // Calculate overall posture score
+    // Calculate vertical posture (shoulders vs hips height)
+    const verticalAlignment = Math.abs(shoulderCenter.y - hipCenter.y);
+    
+    // Calculate overall posture score with more sensitive thresholds
     let postureScore = 100;
     
-    // Deduct points for spine misalignment
-    if (spineAlignment > 0.08) postureScore -= 40;
-    else if (spineAlignment > 0.05) postureScore -= 20;
-    else if (spineAlignment > 0.03) postureScore -= 10;
+    // Deduct points for spine misalignment (more sensitive)
+    if (spineAlignment > 0.05) postureScore -= 50;
+    else if (spineAlignment > 0.03) postureScore -= 30;
+    else if (spineAlignment > 0.02) postureScore -= 15;
+    else if (spineAlignment > 0.01) postureScore -= 5;
     
-    // Deduct points for head misalignment
-    if (headAlignment > 0.06) postureScore -= 30;
-    else if (headAlignment > 0.04) postureScore -= 15;
-    else if (headAlignment > 0.02) postureScore -= 5;
+    // Deduct points for head misalignment (more sensitive)
+    if (headAlignment > 0.04) postureScore -= 40;
+    else if (headAlignment > 0.03) postureScore -= 25;
+    else if (headAlignment > 0.02) postureScore -= 15;
+    else if (headAlignment > 0.01) postureScore -= 5;
 
-    // Determine posture category
+    // Deduct points for vertical misalignment
+    if (verticalAlignment > 0.1) postureScore -= 30;
+    else if (verticalAlignment > 0.05) postureScore -= 15;
+
+    // Determine posture category with more responsive thresholds
     let posture = 'good';
-    if (postureScore < 50) posture = 'slouched';
-    else if (postureScore < 75) posture = 'slightly_off';
+    if (postureScore < 60) posture = 'slouched';
+    else if (postureScore < 80) posture = 'slightly_off';
 
-    // Calculate confidence (based on landmark visibility and consistency)
-    const confidence = (visibleLandmarks.length / keyLandmarks.length) * 100;
+    // Calculate movement-based confidence
+    let movementConfidence = 0;
+    if (previousLandmarks) {
+      // Calculate movement between frames
+      const currentCenter = {
+        x: (shoulderCenter.x + hipCenter.x) / 2,
+        y: (shoulderCenter.y + hipCenter.y) / 2
+      };
+      
+      const prevCenter = {
+        x: (previousLandmarks.shoulderCenter.x + previousLandmarks.hipCenter.x) / 2,
+        y: (previousLandmarks.shoulderCenter.y + previousLandmarks.hipCenter.y) / 2
+      };
+      
+      const movement = Math.sqrt(
+        Math.pow(currentCenter.x - prevCenter.x, 2) + 
+        Math.pow(currentCenter.y - prevCenter.y, 2)
+      );
+      
+      // Higher movement = higher confidence (more active detection)
+      movementConfidence = Math.min(100, movement * 1000);
+    }
+
+    // Combine visibility and movement confidence
+    const visibilityConfidence = (visibleLandmarks.length / keyLandmarks.length) * 100;
+    const totalConfidence = Math.max(visibilityConfidence, movementConfidence);
+
+    // Store current landmarks for next frame
+    setPreviousLandmarks({
+      shoulderCenter,
+      hipCenter,
+      earCenter
+    });
 
     const newBodyLanguageData = {
       ...bodyLanguageData,
       posture,
-      confidence: Math.round(confidence)
+      confidence: Math.round(totalConfidence)
     };
 
-    console.log('Body language analysis:', newBodyLanguageData);
+    console.log('Body language analysis:', {
+      ...newBodyLanguageData,
+      spineAlignment: spineAlignment.toFixed(3),
+      headAlignment: headAlignment.toFixed(3),
+      postureScore
+    });
     setBodyLanguageData(newBodyLanguageData);
   };
 

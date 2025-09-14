@@ -89,7 +89,7 @@ header p {
 }
 
 .start-btn {
-    background: #e9ecef);
+    background: #e9ecef;
     color: black;
     border: 1px solid #ccc; /* thin gray border */
     border-radius: 12px;
@@ -327,6 +327,12 @@ header p {
     backdrop-filter: blur(10px);
 }
 
+.feedback-section {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
 .video-section h2,
 .transcript-section h2,
 .feedback-section h2 {
@@ -366,6 +372,7 @@ header p {
     height: 100%;
     color: #666;
     text-align: center;
+    flex: 1;
 }
 
 .placeholder-icon {
