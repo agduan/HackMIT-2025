@@ -21,11 +21,11 @@ const VisionMetrics = ({ eyeContactData, bodyLanguageData }) => {
 
   const getGazeDirectionText = (direction) => {
     switch (direction) {
-      case 'center': return 'Looking at camera';
-      case 'left': return 'Looking left';
-      case 'right': return 'Looking right';
-      case 'up': return 'Looking up';
-      case 'down': return 'Looking down';
+      case 'center': return 'Facing camera';
+      case 'left': return 'Facing left';
+      case 'right': return 'Facing right';
+      case 'up': return 'Facing up';
+      case 'down': return 'Facing down';
       default: return 'Unknown';
     }
   };
@@ -43,8 +43,8 @@ const VisionMetrics = ({ eyeContactData, bodyLanguageData }) => {
             {eyeContactData.eyeContactPercentage.toFixed(0)}%
           </div>
           <div className="metric-details">
-            <p><strong>Status:</strong> {getGazeDirectionText(eyeContactData.gazeDirection)}</p>
             <p><strong>Looking at camera:</strong> {eyeContactData.isLookingAtCamera ? 'Yes' : 'No'}</p>
+            <p><strong>Status:</strong> {getGazeDirectionText(eyeContactData.gazeDirection)}</p>
           </div>
         </div>
 
