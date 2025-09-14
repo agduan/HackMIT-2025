@@ -37,11 +37,12 @@ Provide specific, actionable advice in 2-3 sentences.`,
 Provide specific, actionable advice in 2-3 sentences.`,
 
     interview: `The following transcript is from an interview. Evaluate the candidate based on:
-    1. Communication skills
-    2. Confidence and poise
-    3. Ability to handle pressure
-    4. Adaptability and flexibility
-    5. Problem-solving skills`,
+1. Communication skills
+2. Confidence and poise
+3. Ability to handle pressure
+4. Adaptability and flexibility
+5. Problem-solving skills
+Provide specific, actionable advice in 2-3 sentences.`,
   };
 
   return prompts[analysisType] || prompts.general;
@@ -135,13 +136,13 @@ io.on("connection", (socket) => {
                               total: 6,
                             },
                           );
-                          liveReport.followUpQuestions = questions;  // keep UI compatible
-                          liveReport.followUpDetails = rich;         // extra metadata (category/anchor/etc.)
+                          liveReport.followUpQuestions = questions; // keep UI compatible
+                          liveReport.followUpDetails = rich; // extra metadata (category/anchor/etc.)
                         } catch (e) {
                           console.error("followups live error:", e);
                         }
                         socket.emit("live-feedback", liveReport);
-                      })
+                      });
                   } catch (error) {
                     console.error(
                       "Error creating analyzer for live feedback:",
@@ -223,7 +224,7 @@ io.on("connection", (socket) => {
           apiKey: getOpenAIApiKey(),
           customPrompt: getCustomPromptForAnalysisType(socket._analysisType),
         });
-      try {
+        try {
           const { questions, rich } = await generateFollowups(
             socket._transcript,
             {
@@ -232,8 +233,8 @@ io.on("connection", (socket) => {
               total: 8,
             },
           );
-          finalReport.followUpQuestions = questions;  // keep existing UI
-          finalReport.followUpDetails = rich;         // rich metadata if you want to render later
+          finalReport.followUpQuestions = questions; // keep existing UI
+          finalReport.followUpDetails = rich; // rich metadata if you want to render later
         } catch (e) {
           console.error("followups final error:", e);
         }

@@ -232,7 +232,7 @@ header p {
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    
+
 }
 
 .dropdown-item:last-child {
@@ -441,6 +441,18 @@ header p {
     border-left-color: #2196f3;
 }
 
+.metric-card.simple {
+    border-left-color: #4caf50;
+}
+
+.metric-card.moderate {
+    border-left-color: #ff9800;
+}
+
+.metric-card.complex {
+    border-left-color: #f44336;
+}
+
 .metric-card h3 {
     color: #333;
     margin-bottom: 10px;
@@ -524,11 +536,6 @@ header p {
     gap: 10px;
 }
 
-.qualitative-feedback-card h3:before {
-    content: "";
-    font-size: 1.2rem;
-}
-
 .feedback-content {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
@@ -547,6 +554,27 @@ header p {
     border-left: 3px solid #ffc107;
     font-size: 0.9rem;
     color: #fff3cd;
+}
+
+.ai-feedback-text {
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.feedback-point {
+    margin: 12px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+}
+
+.feedback-point:last-child {
+    border-bottom: none;
+}
+
+.feedback-text {
+    margin: 8px 0;
+    line-height: 1.6;
 }
 
 /* Loading Feedback */

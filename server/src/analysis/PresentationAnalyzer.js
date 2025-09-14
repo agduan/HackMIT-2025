@@ -191,6 +191,66 @@ Start with the word Pineapple.`;
     return { longPauseCount: longPauses, score, feedback };
   }
 
+  analyzeReadability() {
+    // Count sentences (rough estimation using punctuation)
+    const sentenceEndMarkers = /[.!?]+/g;
+    const sentences = this.fullText.match(sentenceEndMarkers) || [];
+    const sentenceCount = Math.max(sentences.length, 1); // Avoid division by zero
+
+    // Count polysyllabic words (words with 3+ syllables)
+    let polysyllableCount = 0;
+
+    this.words.forEach((word) => {
+      const syllableCount = this.countSyllables(word);
+      if (syllableCount >= 3) {
+        polysyllableCount++;
+      }
+    });
+
+    // SMOG formula: 1.0430 * sqrt(polysyllables * 30 / sentences) + 3.1291
+    const smogIndex =
+      1.043 * Math.sqrt((polysyllableCount * 30) / sentenceCount) + 3.1291;
+    const roundedIndex = Math.round(smogIndex * 10) / 10; // Round to 1 decimal place
+
+    let score = "good";
+    let feedback = `Your content has a readability level suitable for grade ${roundedIndex}, which is appropriate for most audiences.`;
+
+    if (roundedIndex > 16) {
+      score = "complex";
+      feedback = `Your content is quite complex (grade ${roundedIndex} level). Consider simplifying language for broader accessibility.`;
+    } else if (roundedIndex > 13) {
+      score = "moderate";
+      feedback = `Your content is moderately complex (grade ${roundedIndex} level). Good for educated audiences but could be simplified.`;
+    } else if (roundedIndex < 8) {
+      score = "simple";
+      feedback = `Your content is very accessible (grade ${roundedIndex} level). Consider if more sophisticated language would benefit your message.`;
+    }
+
+    return {
+      smogIndex: roundedIndex,
+      polysyllableCount,
+      sentenceCount,
+      score,
+      feedback,
+    };
+  }
+
+  countSyllables(word) {
+    // Simple syllable counting algorithm
+    word = word.toLowerCase();
+    if (word.length <= 3) return 1;
+
+    // Remove common endings that don't add syllables
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "");
+    word = word.replace(/^y/, "");
+
+    // Count vowel groups
+    const vowelGroups = word.match(/[aeiouy]+/g);
+    const syllableCount = vowelGroups ? vowelGroups.length : 1;
+
+    return Math.max(syllableCount, 1);
+  }
+
   async analyzeQualitativeFeedback(customPrompt = null, apiKey = null) {
     if (!apiKey) {
       throw new Error(
@@ -297,6 +357,7 @@ Start with the word Pineapple.`;
       pacing: this.analyzePacing(),
       fillerWords: this.analyzeFillerWords(),
       pauses: this.analyzePauses(),
+      readability: this.analyzeReadability(),
       followUpQuestions: this.generateFollowupQuestions(),
     };
 

@@ -113,14 +113,14 @@ function App() {
         console.log("Setting up video stream:", stream);
         console.log("Video tracks:", stream.getVideoTracks());
         setVideoStream(stream);
-        
+
         // Use setTimeout to ensure the video element is rendered after state update
         setTimeout(() => {
           if (videoRef.current) {
             console.log("Setting video srcObject");
             videoRef.current.srcObject = stream;
             // Force video to play
-            videoRef.current.play().catch(err => {
+            videoRef.current.play().catch((err) => {
               console.error("Video play error:", err);
             });
           } else {
@@ -262,11 +262,41 @@ function App() {
           feedback={data.pauses?.feedback}
           score={data.pauses?.score}
         />
+        <MetricCard
+          title="Readability"
+          value={`Grade ${data.readability?.smogIndex || 0}`}
+          feedback={data.readability?.feedback}
+          score={data.readability?.score}
+        />
         {data.qualitativeFeedback && showAIFeedback && (
           <div className="qualitative-feedback-card">
-            <h3>AI Feedback</h3>
+            <h3>🤖 AI Feedback</h3>
             <div className="feedback-content">
-              {data.qualitativeFeedback.feedback}
+              <div className="ai-feedback-text">
+                {data.qualitativeFeedback.feedback
+                  .split(/\d+\.|\n/)
+                  .map((segment, index) => {
+                    const cleanSegment = segment.trim();
+                    if (!cleanSegment) return null;
+
+                    // Check if this looks like a numbered point
+                    const isNumberedPoint =
+                      data.qualitativeFeedback.feedback.includes(`${index}.`) ||
+                      cleanSegment.length > 20;
+
+                    return (
+                      <div
+                        key={index}
+                        className={
+                          isNumberedPoint ? "feedback-point" : "feedback-text"
+                        }
+                      >
+                        {cleanSegment}
+                      </div>
+                    );
+                  })
+                  .filter(Boolean)}
+              </div>
             </div>
             {data.qualitativeFeedback.source === "error" && (
               <p className="error-note">Note: Using fallback analysis</p>
