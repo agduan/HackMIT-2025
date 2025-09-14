@@ -231,7 +231,7 @@ function App() {
     </div>
   );
 
-  const renderMetrics = (data) => {
+  const renderMetrics = (data, showAIFeedback = true) => {
     if (!data) return null;
 
     return (
@@ -254,7 +254,7 @@ function App() {
           feedback={data.pauses?.feedback}
           score={data.pauses?.score}
         />
-        {data.qualitativeFeedback && (
+        {data.qualitativeFeedback && showAIFeedback && (
           <div className="qualitative-feedback-card">
             <h3>AI Feedback</h3>
             <div className="feedback-content">
@@ -455,17 +455,17 @@ function App() {
               </div>
             )}
 
-            {liveFeedback && (
+            {liveFeedback && !finalAnalysis && (
               <div className="live-feedback">
                 <h3>Live Analysis</h3>
-                {renderMetrics(liveFeedback)}
+                {renderMetrics(liveFeedback, false)}
               </div>
             )}
 
             {finalAnalysis && (
               <div className="final-analysis">
                 <h3>Final Analysis</h3>
-                {renderMetrics(finalAnalysis)}
+                {renderMetrics(finalAnalysis, true)}
 
                 {finalAnalysis.followUpQuestions &&
                   finalAnalysis.followUpQuestions.length > 0 && (
