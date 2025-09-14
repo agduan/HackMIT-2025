@@ -28,29 +28,19 @@ function getCustomPromptForAnalysisType(analysisType) {
 4. Strengths to maintain
 Provide specific, actionable advice in 2-3 sentences.`,
 
-    teaching: `Analyze this technical presentation transcript with focus on:
-1. Technical accuracy and depth of explanation
-2. Use of appropriate technical terminology
-3. Clarity in explaining complex concepts
-4. Logical flow of technical information
-5. Accessibility to the target audience
-Provide specific technical communication advice in 2-3 sentences.`,
+    teaching: `Analyze this teaching session and provide constructive feedback. Focus on:
+1. Content clarity and structure
+2. Communication effectiveness
+3. Areas for improvement
+4. Strengths to maintain
+Provide specific, actionable advice in 2-3 sentences.`,
 
-    interview: `Analyze this business presentation transcript focusing on:
-1. Value proposition clarity
-2. Persuasiveness and impact
-3. Professional communication style
-4. Market understanding demonstration
-5. Call-to-action effectiveness
-Provide business-focused feedback and improvement suggestions in 2-3 sentences.`,
-
-    academic: `Analyze this academic presentation transcript with emphasis on:
-1. Research methodology and evidence presentation
-2. Academic rigor and scholarly communication
-3. Logical argument structure
-4. Citation and source integration
-5. Contribution to knowledge in the field
-Provide academic presentation improvement advice in 2-3 sentences.`,
+    interview: `The following transcript is from an interview. Evaluate the candidate based on:
+    1. Communication skills
+    2. Confidence and poise
+    3. Ability to handle pressure
+    4. Adaptability and flexibility
+    5. Problem-solving skills`,
   };
 
   return prompts[analysisType] || prompts.general;

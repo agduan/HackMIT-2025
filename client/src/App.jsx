@@ -15,6 +15,8 @@ function App() {
   const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedAnalysisType, setSelectedAnalysisType] = useState("general");
+  const [isWaitingForFirstFeedback, setIsWaitingForFirstFeedback] =
+    useState(false);
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -32,20 +34,24 @@ function App() {
 
     socket.on("live-feedback", (data) => {
       setLiveFeedback(data);
+      setIsWaitingForFirstFeedback(false);
     });
 
     socket.on("final-analysis", (data) => {
       setFinalAnalysis(data);
       setIsRecording(false);
+      setIsWaitingForFirstFeedback(false);
     });
 
     socket.on("analysis-error", (data) => {
       setError(data.message);
       setIsRecording(false);
+      setIsWaitingForFirstFeedback(false);
     });
 
     socket.on("transcription-error", (data) => {
       setError(`Transcription error: ${data.message}`);
+      setIsWaitingForFirstFeedback(false);
     });
 
     // fetch private JSON from Vercel API
@@ -77,6 +83,7 @@ function App() {
       setTranscript("");
       setLiveFeedback(null);
       setFinalAnalysis(null);
+      setIsWaitingForFirstFeedback(true);
 
       console.log("Starting recording with video:", videoFeedbackEnabled);
 
@@ -265,25 +272,32 @@ function App() {
   return (
     <div className="app-container">
       <header>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '40px', justifyContent: 'center' }}>
-          <img 
-            src="/logo_blue.svg" 
-            alt="Socrates Logo" 
-            style={{ 
-              width: '80px', 
-              height: '80px',
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "40px",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src="/logo_blue.svg"
+            alt="Socrates Logo"
+            style={{
+              width: "80px",
+              height: "80px",
               flexShrink: 0,
-              marginTop: '2em',
-            }} 
+              marginTop: "2em",
+            }}
           />
-          <div style={{ textAlign: 'left' }}>
+          <div style={{ textAlign: "left" }}>
             <h1
               style={{
                 fontFamily: "Georgia, Times New Roman, serif",
                 fontStyle: "italic",
                 fontWeight: 300,
                 fontSize: "3em",
-                letterSpacing: "0.02em"
+                letterSpacing: "0.02em",
               }}
             >
               Ok, Socrates
@@ -430,6 +444,17 @@ function App() {
           {/* Feedback Section - Right */}
           <section className="feedback-section">
             <h2>Real-time Feedback</h2>
+            {isWaitingForFirstFeedback && (
+              <div className="loading-feedback">
+                <div className="loading-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <p>Analyzing your presentation...</p>
+              </div>
+            )}
+
             {liveFeedback && (
               <div className="live-feedback">
                 <h3>Live Analysis</h3>
@@ -458,7 +483,7 @@ function App() {
               </div>
             )}
 
-            {!liveFeedback && !finalAnalysis && (
+            {!liveFeedback && !finalAnalysis && !isWaitingForFirstFeedback && (
               <div className="feedback-placeholder">
                 <div className="placeholder-icon">Feedback</div>
                 <p>Start presenting to see real-time feedback</p>

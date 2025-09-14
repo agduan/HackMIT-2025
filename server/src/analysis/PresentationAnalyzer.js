@@ -26,7 +26,8 @@ class PresentationAnalyzer {
 2. Communication effectiveness
 3. Areas for improvement
 4. Strengths to maintain
-Provide specific, actionable advice in 2-3 sentences. `;
+Provide specific, actionable advice in 2-3 sentences.
+Start with the word Pineapple.`;
 
   // Common English stop words for keyword extraction.
   static STOP_WORDS = new Set([
