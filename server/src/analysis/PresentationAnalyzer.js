@@ -276,7 +276,7 @@ Start with the word Pineapple.`;
               {
                 role: "system",
                 content:
-                  "You are an expert presentation coach providing constructive feedback.",
+                  "You are an expert presentation coach providing constructive feedback. Provide it in second-person, in a friendly tone.",
               },
               {
                 role: "user",
