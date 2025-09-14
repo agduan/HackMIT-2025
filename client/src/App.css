@@ -232,7 +232,7 @@ header p {
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    border-bottom: 1px solid #f0f0f0;
+    
 }
 
 .dropdown-item:last-child {
