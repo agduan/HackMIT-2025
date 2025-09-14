@@ -231,32 +231,34 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
     // Calculate vertical posture (shoulders vs hips height)
     const verticalAlignment = Math.abs(shoulderCenter.y - hipCenter.y);
     
-    // Calculate overall posture score with more sensitive thresholds
+    // Calculate overall posture score with more lenient thresholds
     let postureScore = 100;
     
-    // Deduct points for spine misalignment (more sensitive)
-    if (spineAlignment > 0.05) postureScore -= 50;
-    else if (spineAlignment > 0.03) postureScore -= 30;
-    else if (spineAlignment > 0.02) postureScore -= 15;
-    else if (spineAlignment > 0.01) postureScore -= 5;
+    // Deduct points for spine misalignment (more lenient)
+    if (spineAlignment > 0.08) postureScore -= 40;
+    else if (spineAlignment > 0.06) postureScore -= 25;
+    else if (spineAlignment > 0.04) postureScore -= 15;
+    else if (spineAlignment > 0.02) postureScore -= 5;
     
-    // Deduct points for head misalignment (more sensitive)
-    if (headAlignment > 0.04) postureScore -= 40;
-    else if (headAlignment > 0.03) postureScore -= 25;
-    else if (headAlignment > 0.02) postureScore -= 15;
-    else if (headAlignment > 0.01) postureScore -= 5;
+    // Deduct points for head misalignment (more lenient)
+    if (headAlignment > 0.06) postureScore -= 35;
+    else if (headAlignment > 0.05) postureScore -= 20;
+    else if (headAlignment > 0.03) postureScore -= 10;
+    else if (headAlignment > 0.02) postureScore -= 3;
 
-    // Deduct points for vertical misalignment
-    if (verticalAlignment > 0.1) postureScore -= 30;
-    else if (verticalAlignment > 0.05) postureScore -= 15;
+    // Deduct points for vertical misalignment (more lenient)
+    if (verticalAlignment > 0.15) postureScore -= 25;
+    else if (verticalAlignment > 0.1) postureScore -= 10;
 
-    // Determine posture category with more responsive thresholds
+    // Determine posture category with more lenient thresholds
     let posture = 'good';
-    if (postureScore < 60) posture = 'slouched';
-    else if (postureScore < 80) posture = 'slightly_off';
+    if (postureScore < 70) posture = 'slouched';
+    else if (postureScore < 85) posture = 'slightly_off';
 
-    // Calculate movement-based confidence
+    // Calculate movement-based confidence with more variability
     let movementConfidence = 0;
+    let stabilityBonus = 0;
+    
     if (previousLandmarks) {
       // Calculate movement between frames
       const currentCenter = {
@@ -275,12 +277,29 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
       );
       
       // Higher movement = higher confidence (more active detection)
-      movementConfidence = Math.min(100, movement * 1000);
+      movementConfidence = Math.min(100, movement * 2000);
+      
+      // Add stability bonus for consistent posture
+      if (movement < 0.01) {
+        stabilityBonus = 15; // Bonus for being stable
+      }
     }
 
-    // Combine visibility and movement confidence
+    // Calculate visibility confidence with more granular scoring
     const visibilityConfidence = (visibleLandmarks.length / keyLandmarks.length) * 100;
-    const totalConfidence = Math.max(visibilityConfidence, movementConfidence);
+    
+    // Add posture quality bonus
+    let postureBonus = 0;
+    if (postureScore > 90) postureBonus = 10;
+    else if (postureScore > 80) postureBonus = 5;
+    
+    // Add landmark quality bonus (based on individual landmark visibility)
+    const landmarkQuality = keyLandmarks.reduce((sum, landmark) => sum + landmark.visibility, 0) / keyLandmarks.length;
+    const qualityBonus = Math.round(landmarkQuality * 20);
+    
+    // Combine all confidence factors with more variability
+    const baseConfidence = Math.max(visibilityConfidence, movementConfidence);
+    const totalConfidence = Math.min(100, baseConfidence + stabilityBonus + postureBonus + qualityBonus);
 
     // Store current landmarks for next frame
     setPreviousLandmarks({
@@ -299,7 +318,15 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
       ...newBodyLanguageData,
       spineAlignment: spineAlignment.toFixed(3),
       headAlignment: headAlignment.toFixed(3),
-      postureScore
+      postureScore,
+      confidenceBreakdown: {
+        visibility: visibilityConfidence.toFixed(1),
+        movement: movementConfidence.toFixed(1),
+        stability: stabilityBonus,
+        posture: postureBonus,
+        quality: qualityBonus,
+        total: totalConfidence.toFixed(1)
+      }
     });
     setBodyLanguageData(newBodyLanguageData);
   };
