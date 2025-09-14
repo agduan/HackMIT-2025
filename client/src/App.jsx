@@ -34,6 +34,7 @@ function App() {
   });
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
+  const stoppingRef = useRef(false);
 
   useEffect(() => {
     // Handle final transcript chunks with timestamps
@@ -196,6 +197,11 @@ function App() {
         setIsRecording(true);
       });
 
+      mediaRecorder.addEventListener("stop", () => {  // ADD
+        console.log("MediaRecorder onstop");
+        setIsRecording(false);
+      });
+
       mediaRecorder.addEventListener("error", (e) => {
         console.error("MediaRecorder error:", e);
         setError("Recording error occurred. Please try again.");
@@ -203,7 +209,7 @@ function App() {
       });
 
       // Use longer intervals to reduce processing overhead
-      mediaRecorder.start(500); // emit every 500ms instead of 250ms
+      mediaRecorder.start(500);
     } catch (err) {
       setError("Failed to access camera/microphone. Please check permissions.");
       console.error("Error starting recording:", err);
@@ -213,7 +219,6 @@ function App() {
 
   const toggleVideoFeedback = () => {
     setVideoFeedbackEnabled(!videoFeedbackEnabled);
-    // If currently recording, stop and restart with new video setting
     if (isRecording) {
       stopRecording();
       setTimeout(() => {
@@ -223,31 +228,35 @@ function App() {
   };
 
   const stopRecording = () => {
+    if (stoppingRef.current) return;          
+      stoppingRef.current = true;
+  
     console.log("Stopping recording...");
-    const mr = mediaRecorderRef.current;
-    if (mr && mr.state === "recording") {
-      mr.stop();
 
-      // Stop all tracks in the full stream (both audio and video)
-      const fullStream = mr.fullStream;
+    setIsRecording(false);
+    socket.emit("end-stream"); 
+
+    const mr = mediaRecorderRef.current;
+
+    if (mr && mr.state !== "inactive") {
+      try { mr.stop(); } catch (e) { /* ignore */ }
+    }
+
+    const fullStream = mr?.fullStream || videoRef.current?.srcObject;
       if (fullStream) {
         fullStream.getTracks().forEach((track) => {
-          console.log(`Stopping ${track.kind} track:`, track.label);
-          track.stop();
-        });
-      }
+        console.log(`Stopping ${track.kind} track:`, track.label);
+        track.stop();
+      });
 
-      // Clear video stream
-      setVideoStream(null);
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
+    // Clear video preview
+    setVideoStream(null);
+    if (videoRef.current) videoRef.current.srcObject = null;
 
-      socket.emit("end-stream");
-      console.log("Recording stopped");
-    } else {
-      console.log("MediaRecorder not recording or not available");
-      setIsRecording(false);
+    console.log("Recording stopped");
+
+    // Allow another stop later
+    setTimeout(() => { stoppingRef.current = false; }, 500);
     }
   };
 
