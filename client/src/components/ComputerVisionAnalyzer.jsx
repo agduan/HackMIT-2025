@@ -3,7 +3,7 @@ import { FaceMesh } from '@mediapipe/face_mesh';
 import { Pose } from '@mediapipe/pose';
 import { Hands } from '@mediapipe/hands';
 
-const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
+const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true }) => {
   const canvasRef = useRef(null);
   const faceMeshRef = useRef(null);
   const poseRef = useRef(null);
@@ -335,8 +335,12 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
   };
 
   const processFrame = async () => {
-    if (!isInitialized || !videoRef.current || !canvasRef.current) {
-      console.log('Skipping frame - not ready:', { isInitialized, hasVideo: !!videoRef.current, hasCanvas: !!canvasRef.current });
+    if (!isActive || !isInitialized || !videoRef.current || !canvasRef.current) {
+      if (!isActive) {
+        console.log('Skipping frame - analysis not active');
+      } else {
+        console.log('Skipping frame - not ready:', { isInitialized, hasVideo: !!videoRef.current, hasCanvas: !!canvasRef.current });
+      }
       return;
     }
 
@@ -384,11 +388,11 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate }) => {
   }, [eyeContactData, bodyLanguageData, onAnalysisUpdate]);
 
   useEffect(() => {
-    if (isInitialized && videoRef.current) {
+    if (isInitialized && videoRef.current && isActive) {
       const interval = setInterval(processFrame, 200); // Process every 200ms for better performance
       return () => clearInterval(interval);
     }
-  }, [isInitialized]);
+  }, [isInitialized, isActive]);
 
   return (
     <canvas

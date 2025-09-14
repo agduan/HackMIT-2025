@@ -469,6 +469,7 @@ function App() {
                   <ComputerVisionAnalyzer 
                     videoRef={videoRef} 
                     onAnalysisUpdate={handleVisionAnalysis}
+                    isActive={isRecording}
                   />
                 </>
               ) : (
@@ -479,11 +480,12 @@ function App() {
               )}
             </div>
 
-            {/* Vision Analysis - Only show when video is enabled and recording */}
-            {videoFeedbackEnabled && isRecording && (
+            {/* Vision Analysis - Show when video is enabled and recording, or when stopped with final analysis */}
+            {videoFeedbackEnabled && (isRecording || finalAnalysis) && (
               <VisionMetrics 
                 eyeContactData={visionAnalysis.eyeContact}
                 bodyLanguageData={visionAnalysis.bodyLanguage}
+                isActive={isRecording}
               />
             )}
           </section>

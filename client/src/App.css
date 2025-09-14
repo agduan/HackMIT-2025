@@ -644,6 +644,29 @@ header p {
   font-size: 1.5rem;
   border-bottom: 3px solid #667eea;
   padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.analysis-status {
+  font-size: 0.8rem;
+  font-weight: normal;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-left: 10px;
+}
+
+.analysis-status.active {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.analysis-status.frozen {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+  border: 1px solid rgba(158, 158, 158, 0.3);
 }
 
 .vision-metrics .metrics-row {

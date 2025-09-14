@@ -1,6 +1,6 @@
 import React from 'react';
 
-const VisionMetrics = ({ eyeContactData, bodyLanguageData }) => {
+const VisionMetrics = ({ eyeContactData, bodyLanguageData, isActive = true }) => {
   const getPostureColor = (posture) => {
     switch (posture) {
       case 'good': return '#4caf50';
@@ -32,7 +32,14 @@ const VisionMetrics = ({ eyeContactData, bodyLanguageData }) => {
 
   return (
     <div className="vision-metrics">
-      <h3>Visual Analysis</h3>
+      <h3>
+        Visual Analysis
+        {isActive ? (
+          <span className="analysis-status active">● Live</span>
+        ) : (
+          <span className="analysis-status frozen">● Frozen</span>
+        )}
+      </h3>
       
       {/* Metrics side by side */}
       <div className="metrics-row">
