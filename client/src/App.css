@@ -525,7 +525,7 @@ header p {
 
 /* Qualitative Feedback Card */
 .qualitative-feedback-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     color: white;
     border-radius: 15px;
     padding: 25px;
@@ -732,7 +732,7 @@ header p {
 }
 
 .vision-feedback {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   border-radius: 15px;
   padding: 20px;
