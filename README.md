@@ -1,5 +1,5 @@
-# Ok, Socrates: A Live Presentation Coach
-Ok, Socrates is a real-time presentation analyzer and note taker web app. It will transcribe and provide instant feedback on speaking pace, filler words, pauses, sentiment, eye contact, and posture during live presentations.
+# Ok, Socrates: Your Live Presentation Coach
+**Ok, Socrates** is a real-time presentation analyzer and note-taker web app. It transcribes and provides instant feedback on speaking pace, filler words, pauses, sentiment, eye contact, and posture during live presentations.
 
 This was made for the education track at HackMIT 2025 and the Wispr Sponsor Challenge.
 
@@ -50,28 +50,28 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
    npm install @google-cloud/speech
    ```
 
-3. **Set up environment variables**
+3. **Set up API keys**
+
+   **OpenAI API Key:**
+   - Visit [OpenAI](https://openai.com) and get your API key
+   - Create a file called `openai-key.txt` in the `server/` directory
+   - Paste your API key (starts with "sk-") into this file
+
+   **Google Cloud Speech-to-Text:**
+   - Visit [Google Cloud Console](https://console.cloud.google.com)
+   - Enable the Speech-to-Text API
+   - Set up authentication (service account key or default credentials)
+
+4. **Set up environment variables**
 
    Create a `.env` file in the root directory:
    ```env
-   # Wispr API Configuration
-   WISPR_ENDPOINT=https://api.wispr.ai/v1/transcribe
-   WISPR_KEY=your_wispr_api_key_here
-
    # Server Configuration
    PORT=4000
 
    # Client Configuration
    VITE_SOCKET_URL=http://localhost:4000
    ```
-
-4. **Get your OpenAI API key**
-   - Visit [OpenAI](https://openai.com)
-   - Copy your API key to the `.env` file
-
-5. **Get your Google Cloud API key**
-   - Visit [Google Cloud](https://cloud.google.com/apis)
-   - Copy your API key to the `.env` file
 
 ### Running the Application
 
@@ -132,7 +132,7 @@ This was made for the education track at HackMIT 2025 and the Wispr Sponsor Chal
 
 - **Frontend**: React 19, Vite, Socket.IO Client
 - **Backend**: Node.js, Express, Socket.IO
-- **Speech-to-Text**: Wispr API
+- **Speech-to-Text**: Google Cloud Speech-to-Text API
 - **Computer Vision**: MediaPipe (Face Mesh, Pose, Hands)
 - **Analysis**: Custom JavaScript presentation analyzer
 - **Styling**: Modern CSS with gradients and animations
@@ -192,7 +192,8 @@ HackMIT-2025/
    - Try refreshing the page
 
 2. **No transcription appearing**
-   - Verify your Wispr API key is correct
+   - Verify your Google Cloud Speech-to-Text API is enabled
+   - Check Google Cloud authentication is set up correctly
    - Check server console for errors
    - Ensure you're speaking clearly and loudly enough
 
@@ -222,8 +223,4 @@ This project was built for the Wispr Challenge at HackMIT 2025:
 
 ## License
 
-This project is created for HackMIT 2025. Feel free to use and modify for educational purposes.
-
----
-
-**Happy Presenting!**
+This project was created for HackMIT 2025. Feel free to use and modify for educational purposes.
