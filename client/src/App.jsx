@@ -54,13 +54,8 @@ function App() {
       setIsWaitingForFirstFeedback(false);
     });
 
-    // fetch private JSON from Vercel API
-    fetch("/api/get-json")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Private JSON from server:", data);
-      })
-      .catch((err) => console.error(err));
+    // Note: /api/get-json is only available when deployed to Vercel
+    // For local development, this endpoint is not available
 
     return () => {
       socket.off("transcript");
@@ -115,10 +110,23 @@ function App() {
 
       // Set up video display with the full stream (including video)
       if (videoFeedbackEnabled) {
+        console.log("Setting up video stream:", stream);
+        console.log("Video tracks:", stream.getVideoTracks());
         setVideoStream(stream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
+        
+        // Use setTimeout to ensure the video element is rendered after state update
+        setTimeout(() => {
+          if (videoRef.current) {
+            console.log("Setting video srcObject");
+            videoRef.current.srcObject = stream;
+            // Force video to play
+            videoRef.current.play().catch(err => {
+              console.error("Video play error:", err);
+            });
+          } else {
+            console.error("videoRef.current is still null after timeout!");
+          }
+        }, 100);
       }
 
       // Check if MediaRecorder is supported and get supported MIME types
@@ -431,6 +439,10 @@ function App() {
                   muted
                   playsInline
                   className="presentation-video"
+                  onLoadedMetadata={() => console.log("Video metadata loaded")}
+                  onCanPlay={() => console.log("Video can play")}
+                  onError={(e) => console.error("Video error:", e)}
+                  onLoadStart={() => console.log("Video load started")}
                 />
               ) : (
                 <div className="video-placeholder">
