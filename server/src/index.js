@@ -4,6 +4,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const speech = require("@google-cloud/speech");
 const { PresentationAnalyzer } = require("./analysis/PresentationAnalyzer");
+const { generateFollowups } = require("./analysis/FollowupGenerator");
 const { getOpenAIApiKey } = require("./utils/apiKey");
 
 const app = express();
@@ -123,12 +124,24 @@ io.on("connection", (socket) => {
                           socket._analysisType,
                         ),
                       })
-                      .then((liveReport) => {
+                      .then(async (liveReport) => {
+                        // ⬇️ NEW: replace basic follow-ups with LLM-based ones
+                        try {
+                          const { questions, rich } = await generateFollowups(
+                            socket._transcript,
+                            {
+                              apiKey: getOpenAIApiKey(),
+                              analysisType: socket._analysisType,
+                              total: 6,
+                            },
+                          );
+                          liveReport.followUpQuestions = questions;  // keep UI compatible
+                          liveReport.followUpDetails = rich;         // extra metadata (category/anchor/etc.)
+                        } catch (e) {
+                          console.error("followups live error:", e);
+                        }
                         socket.emit("live-feedback", liveReport);
                       })
-                      .catch((error) => {
-                        console.error("Error during live analysis:", error);
-                      });
                   } catch (error) {
                     console.error(
                       "Error creating analyzer for live feedback:",
@@ -210,6 +223,20 @@ io.on("connection", (socket) => {
           apiKey: getOpenAIApiKey(),
           customPrompt: getCustomPromptForAnalysisType(socket._analysisType),
         });
+      try {
+          const { questions, rich } = await generateFollowups(
+            socket._transcript,
+            {
+              apiKey: getOpenAIApiKey(),
+              analysisType: socket._analysisType,
+              total: 8,
+            },
+          );
+          finalReport.followUpQuestions = questions;  // keep existing UI
+          finalReport.followUpDetails = rich;         // rich metadata if you want to render later
+        } catch (e) {
+          console.error("followups final error:", e);
+        }
         // The 'final-analysis' event signals the definitive end report
         socket.emit("final-analysis", finalReport);
       } catch (error) {
