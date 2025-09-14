@@ -178,7 +178,10 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
     };
 
     console.log('Eye contact analysis:', newEyeContactData);
-    setEyeContactData(newEyeContactData);
+    setEyeContactData(prev => ({
+      ...prev,
+      ...newEyeContactData
+    }));
   };
 
   const analyzeBodyLanguage = (landmarks) => {
@@ -309,8 +312,9 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
     });
 
     const newBodyLanguageData = {
-      ...bodyLanguageData,
       posture,
+      handGestures: bodyLanguageData.handGestures,
+      movement: bodyLanguageData.movement,
       confidence: Math.round(totalConfidence)
     };
 
@@ -328,7 +332,12 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
         total: totalConfidence.toFixed(1)
       }
     });
-    setBodyLanguageData(newBodyLanguageData);
+    
+    // Force state update to ensure re-render
+    setBodyLanguageData(prev => ({
+      ...prev,
+      ...newBodyLanguageData
+    }));
   };
 
   const analyzeHandGestures = (handLandmarks) => {
@@ -408,6 +417,10 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
   // Update parent with current analysis data whenever it changes
   useEffect(() => {
+    console.log('Updating parent with new data:', {
+      eyeContact: eyeContactData,
+      bodyLanguage: bodyLanguageData
+    });
     onAnalysisUpdate({
       eyeContact: eyeContactData,
       bodyLanguage: bodyLanguageData
@@ -416,7 +429,7 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
   useEffect(() => {
     if (isInitialized && videoRef.current && isActive) {
-      const interval = setInterval(processFrame, 200); // Process every 200ms for better performance
+      const interval = setInterval(processFrame, 150); // Process every 150ms for more responsive updates
       return () => clearInterval(interval);
     }
   }, [isInitialized, isActive]);
