@@ -1,7 +1,4 @@
 import { useRef, useEffect, useState } from 'react';
-import { FaceMesh } from '@mediapipe/face_mesh';
-import { Pose } from '@mediapipe/pose';
-import { Hands } from '@mediapipe/hands';
 
 const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true }) => {
   const canvasRef = useRef(null);
@@ -32,6 +29,11 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
     const initializeMediaPipe = async () => {
       try {
         console.log('Initializing MediaPipe models...');
+        
+        // Dynamically load MediaPipe modules from CDN
+        const { FaceMesh } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
+        const { Pose } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
+        const { Hands } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
         
         // Initialize Face Mesh for eye tracking
         const faceMesh = new FaceMesh({
