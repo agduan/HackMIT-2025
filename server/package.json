@@ -14,9 +14,13 @@
   "type": "commonjs",
   "dependencies": {
     "@google-cloud/speech": "^7.2.0",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
+    "@mediapipe/hands": "^0.4.1675469240",
+    "@mediapipe/pose": "^0.5.1675469404",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

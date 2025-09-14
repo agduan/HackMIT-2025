@@ -34,6 +34,7 @@ function App() {
   });
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
+  const stoppingRef = useRef(false); // ADD
 
   useEffect(() => {
     // Handle final transcript chunks with timestamps
@@ -196,6 +197,11 @@ function App() {
         setIsRecording(true);
       });
 
+      mediaRecorder.addEventListener("stop", () => {  // ADD
+        console.log("MediaRecorder onstop");
+        setIsRecording(false);
+      });
+
       mediaRecorder.addEventListener("error", (e) => {
         console.error("MediaRecorder error:", e);
         setError("Recording error occurred. Please try again.");
@@ -223,13 +229,21 @@ function App() {
   };
 
   const stopRecording = () => {
+    if (stoppingRef.current) return;          // ADD: prevent double taps
+    stoppingRef.current = true;
+
     console.log("Stopping recording...");
+
+    setIsRecording(false);
+    socket.emit("end-stream");
+
     const mr = mediaRecorderRef.current;
-    if (mr && mr.state === "recording") {
-      mr.stop();
+    if (mr && mr.state !== "inactive") {
+      try {mr.stop();} catch (e) {/* ignore*/}
+    }
 
       // Stop all tracks in the full stream (both audio and video)
-      const fullStream = mr.fullStream;
+      const fullStream = mr?.fullStream || videoRef.current?.srcObject;
       if (fullStream) {
         fullStream.getTracks().forEach((track) => {
           console.log(`Stopping ${track.kind} track:`, track.label);
@@ -243,12 +257,10 @@ function App() {
         videoRef.current.srcObject = null;
       }
 
-      socket.emit("end-stream");
       console.log("Recording stopped");
-    } else {
-      console.log("MediaRecorder not recording or not available");
-      setIsRecording(false);
-    }
+
+      // Allow another stop later
+      setTimeout(() => { stoppingRef.current = false; }, 500);
   };
 
   const MetricCard = ({ title, value, feedback, score }) => (
