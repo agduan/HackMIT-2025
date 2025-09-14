@@ -271,7 +271,7 @@ Start with the word Pineapple.`;
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o-mini",
             messages: [
               {
                 role: "system",
@@ -280,7 +280,7 @@ Start with the word Pineapple.`;
               },
               {
                 role: "user",
-                content: `${prompt}\n\nTranscript: ${transcriptText}`,
+                content: `${prompt} Format into **category:** subject newline **category:** subject newline etc...\n\nTranscript: ${transcriptText}`,
               },
             ],
             max_tokens: 300,

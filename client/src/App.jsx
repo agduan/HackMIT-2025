@@ -23,14 +23,14 @@ function App() {
     eyeContact: {
       isLookingAtCamera: false,
       eyeContactPercentage: 0,
-      gazeDirection: 'center'
+      gazeDirection: "center",
     },
     bodyLanguage: {
-      posture: 'good',
+      posture: "good",
       handGestures: 0,
-      movement: 'minimal',
-      confidence: 0
-    }
+      movement: "minimal",
+      confidence: 0,
+    },
   });
   const mediaRecorderRef = useRef(null);
   const videoRef = useRef(null);
@@ -197,7 +197,8 @@ function App() {
         setIsRecording(true);
       });
 
-      mediaRecorder.addEventListener("stop", () => {  // ADD
+      mediaRecorder.addEventListener("stop", () => {
+        // ADD
         console.log("MediaRecorder onstop");
         setIsRecording(false);
       });
@@ -229,7 +230,7 @@ function App() {
   };
 
   const stopRecording = () => {
-    if (stoppingRef.current) return;          // ADD: prevent double taps
+    if (stoppingRef.current) return; // ADD: prevent double taps
     stoppingRef.current = true;
 
     console.log("Stopping recording...");
@@ -239,28 +240,34 @@ function App() {
 
     const mr = mediaRecorderRef.current;
     if (mr && mr.state !== "inactive") {
-      try {mr.stop();} catch (e) {/* ignore*/}
+      try {
+        mr.stop();
+      } catch (e) {
+        /* ignore*/
+      }
     }
 
-      // Stop all tracks in the full stream (both audio and video)
-      const fullStream = mr?.fullStream || videoRef.current?.srcObject;
-      if (fullStream) {
-        fullStream.getTracks().forEach((track) => {
-          console.log(`Stopping ${track.kind} track:`, track.label);
-          track.stop();
-        });
-      }
+    // Stop all tracks in the full stream (both audio and video)
+    const fullStream = mr?.fullStream || videoRef.current?.srcObject;
+    if (fullStream) {
+      fullStream.getTracks().forEach((track) => {
+        console.log(`Stopping ${track.kind} track:`, track.label);
+        track.stop();
+      });
+    }
 
-      // Clear video stream
-      setVideoStream(null);
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
+    // Clear video stream
+    setVideoStream(null);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
 
-      console.log("Recording stopped");
+    console.log("Recording stopped");
 
-      // Allow another stop later
-      setTimeout(() => { stoppingRef.current = false; }, 500);
+    // Allow another stop later
+    setTimeout(() => {
+      stoppingRef.current = false;
+    }, 500);
   };
 
   const MetricCard = ({ title, value, feedback, score }) => (
@@ -306,24 +313,34 @@ function App() {
             <div className="feedback-content">
               <div className="ai-feedback-text">
                 {data.qualitativeFeedback.feedback
-                  .split(/\d+\.|\n/)
-                  .map((segment, index) => {
-                    const cleanSegment = segment.trim();
-                    if (!cleanSegment) return null;
+                  .split("\n")
+                  .map((line, index) => {
+                    const cleanLine = line.trim();
+                    if (!cleanLine) return null;
 
-                    // Check if this looks like a numbered point
-                    const isNumberedPoint =
-                      data.qualitativeFeedback.feedback.includes(`${index}.`) ||
-                      cleanSegment.length > 20;
+                    // Check if line matches the **category:** format
+                    const categoryMatch = cleanLine.match(
+                      /^\*\*([^*]+):\*\*\s*(.*)$/,
+                    );
 
+                    if (categoryMatch) {
+                      const [, category, content] = categoryMatch;
+                      return (
+                        <div key={index} className="feedback-point">
+                          <strong className="feedback-category">
+                            {category}:
+                          </strong>{" "}
+                          <span className="feedback-content-text">
+                            {content}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    // Regular text line
                     return (
-                      <div
-                        key={index}
-                        className={
-                          isNumberedPoint ? "feedback-point" : "feedback-text"
-                        }
-                      >
-                        {cleanSegment}
+                      <div key={index} className="feedback-text">
+                        {cleanLine}
                       </div>
                     );
                   })
@@ -503,13 +520,15 @@ function App() {
                     muted
                     playsInline
                     className="presentation-video"
-                    onLoadedMetadata={() => console.log("Video metadata loaded")}
+                    onLoadedMetadata={() =>
+                      console.log("Video metadata loaded")
+                    }
                     onCanPlay={() => console.log("Video can play")}
                     onError={(e) => console.error("Video error:", e)}
                     onLoadStart={() => console.log("Video load started")}
                   />
-                  <ComputerVisionAnalyzer 
-                    videoRef={videoRef} 
+                  <ComputerVisionAnalyzer
+                    videoRef={videoRef}
                     onAnalysisUpdate={handleVisionAnalysis}
                     isActive={isRecording}
                   />
@@ -524,7 +543,7 @@ function App() {
 
             {/* Vision Analysis - Show when video is enabled and recording, or when stopped with final analysis */}
             {videoFeedbackEnabled && (isRecording || finalAnalysis) && (
-              <VisionMetrics 
+              <VisionMetrics
                 eyeContactData={visionAnalysis.eyeContact}
                 bodyLanguageData={visionAnalysis.bodyLanguage}
                 isActive={isRecording}
