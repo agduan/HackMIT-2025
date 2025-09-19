@@ -4,8 +4,8 @@
 
 This was made for the education track at HackMIT 2025 and the Wispr Sponsor Challenge.
 
-<p align="center">
 ![Ok, Socrates Screenshot](./oksocrates.png)
+<p align="center">
   <em>User interface with real-time presentation analysis</em>
 </p>
 
