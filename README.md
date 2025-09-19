@@ -1,7 +1,13 @@
 # Ok, Socrates: Your Live Presentation Coach
+
 **Ok, Socrates** is a real-time presentation analyzer and note-taker web app. It transcribes and provides instant feedback both on verbal and visual aspects of your presentation. More specifically, it will judge on speaking pace, filler words, pauses, readability, eye contact, and posture during live presentations.
 
 This was made for the education track at HackMIT 2025 and the Wispr Sponsor Challenge.
+
+<p align="center">
+![Ok, Socrates Screenshot](./oksocrates.png)
+  <em>User interface with real-time presentation analysis</em>
+</p>
 
 ## Features
 

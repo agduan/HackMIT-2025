@@ -17,7 +17,7 @@ const speechClient = new speech.SpeechClient({
 });
 
 // --- Configuration for Live Feedback ---
-const LIVE_FEEDBACK_INTERVAL_MS = 5000; // Send feedback every 5 seconds
+const LIVE_FEEDBACK_INTERVAL_MS = 3000; // Send feedback every 3 seconds for faster updates
 
 // Different system prompts for different analysis types
 function getCustomPromptForAnalysisType(analysisType) {
