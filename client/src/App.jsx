@@ -208,8 +208,8 @@ function App() {
         setIsRecording(false);
       });
 
-      // Use longer intervals to reduce processing overhead
-      mediaRecorder.start(500);
+      // Optimized interval for faster transcript updates
+      mediaRecorder.start(250);
     } catch (err) {
       setError("Failed to access camera/microphone. Please check permissions.");
       console.error("Error starting recording:", err);
@@ -223,7 +223,7 @@ function App() {
       stopRecording();
       setTimeout(() => {
         startRecording();
-      }, 100);
+      }, 50);
     }
   };
 
@@ -256,7 +256,7 @@ function App() {
     console.log("Recording stopped");
 
     // Allow another stop later
-    setTimeout(() => { stoppingRef.current = false; }, 500);
+    setTimeout(() => { stoppingRef.current = false; }, 200);
     }
   };
 
