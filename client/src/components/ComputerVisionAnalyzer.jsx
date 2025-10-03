@@ -1,7 +1,4 @@
 import { useRef, useEffect, useState } from 'react';
-import { FaceMesh } from '@mediapipe/face_mesh';
-import { Pose } from '@mediapipe/pose';
-import { Hands } from '@mediapipe/hands';
 
 const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true }) => {
   const canvasRef = useRef(null);
@@ -32,6 +29,27 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
     const initializeMediaPipe = async () => {
       try {
         console.log('Initializing MediaPipe models...');
+        
+        // Dynamically load MediaPipe modules
+        let FaceMesh, Pose, Hands;
+        
+        if (import.meta.env.DEV) {
+          // Development: use local imports
+          const faceMeshModule = await import('@mediapipe/face_mesh');
+          const poseModule = await import('@mediapipe/pose');
+          const handsModule = await import('@mediapipe/hands');
+          FaceMesh = faceMeshModule.FaceMesh;
+          Pose = poseModule.Pose;
+          Hands = handsModule.Hands;
+        } else {
+          // Production: use CDN imports
+          const faceMeshModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
+          const poseModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
+          const handsModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
+          FaceMesh = faceMeshModule.FaceMesh;
+          Pose = poseModule.Pose;
+          Hands = handsModule.Hands;
+        }
         
         // Initialize Face Mesh for eye tracking
         const isProd = import.meta.env.PROD;
