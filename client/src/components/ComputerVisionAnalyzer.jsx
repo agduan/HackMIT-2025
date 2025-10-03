@@ -110,25 +110,52 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
         // Set up face mesh results
         faceMesh.onResults((results) => {
+          console.log('FaceMesh results:', {
+            hasMultiFaceLandmarks: !!results.multiFaceLandmarks,
+            landmarkCount: results.multiFaceLandmarks?.length || 0,
+            hasImage: !!results.image,
+            imageSize: results.image ? `${results.image.width}x${results.image.height}` : 'none'
+          });
+          
           if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             console.log('Face detected, analyzing eye contact...');
             analyzeEyeContact(results.multiFaceLandmarks[0]);
+          } else {
+            console.log('No face landmarks detected');
           }
         });
 
         // Set up pose results
         pose.onResults((results) => {
+          console.log('Pose results:', {
+            hasPoseLandmarks: !!results.poseLandmarks,
+            landmarkCount: results.poseLandmarks?.length || 0,
+            hasImage: !!results.image,
+            imageSize: results.image ? `${results.image.width}x${results.image.height}` : 'none'
+          });
+          
           if (results.poseLandmarks) {
             console.log('Pose detected, analyzing body language...');
             analyzeBodyLanguage(results.poseLandmarks);
+          } else {
+            console.log('No pose landmarks detected');
           }
         });
 
         // Set up hands results
         hands.onResults((results) => {
+          console.log('Hands results:', {
+            hasMultiHandLandmarks: !!results.multiHandLandmarks,
+            landmarkCount: results.multiHandLandmarks?.length || 0,
+            hasImage: !!results.image,
+            imageSize: results.image ? `${results.image.width}x${results.image.height}` : 'none'
+          });
+          
           if (results.multiHandLandmarks) {
             console.log('Hands detected, analyzing gestures...');
             analyzeHandGestures(results.multiHandLandmarks);
+          } else {
+            console.log('No hand landmarks detected');
           }
         });
 
@@ -436,6 +463,13 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
     // Process with MediaPipe
     try {
+      console.log('Sending frame to MediaPipe:', {
+        canvasSize: `${canvas.width}x${canvas.height}`,
+        hasFaceMesh: !!faceMeshRef.current,
+        hasPose: !!poseRef.current,
+        hasHands: !!handsRef.current
+      });
+      
       if (faceMeshRef.current) {
         await faceMeshRef.current.send({ image: canvas });
       }
