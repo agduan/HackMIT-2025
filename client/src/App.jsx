@@ -14,7 +14,7 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState(null);
   const [videoStream, setVideoStream] = useState(null);
-  const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(false);
+  const [videoFeedbackEnabled, setVideoFeedbackEnabled] = useState(true);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedAnalysisType, setSelectedAnalysisType] = useState("general");
   const [isWaitingForFirstFeedback, setIsWaitingForFirstFeedback] =

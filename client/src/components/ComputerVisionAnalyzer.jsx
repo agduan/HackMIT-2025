@@ -52,8 +52,17 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
         }
         
         // Initialize Face Mesh for eye tracking
+        const isProd = import.meta.env.PROD;
         const faceMesh = new FaceMesh({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+          locateFile: (file) => {
+            if (isProd) {
+              // On production: pull from CDN
+              return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+            } else {
+              // On local: use node_modules
+              return `/node_modules/@mediapipe/face_mesh/${file}`;
+            }
+          }
         });
 
         faceMesh.setOptions({
@@ -65,7 +74,15 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
         // Initialize Pose for body language
         const pose = new Pose({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+          locateFile: (file) => {
+            if (isProd) {
+              // On production: pull from CDN
+              return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+            } else {
+              // On local: use node_modules
+              return `/node_modules/@mediapipe/pose/${file}`;
+            }
+          }
         });
 
         pose.setOptions({
@@ -79,7 +96,15 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
         // Initialize Hands for gesture detection
         const hands = new Hands({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+          locateFile: (file) => {
+            if (isProd) {
+              // On production: pull from CDN
+              return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            } else {
+              // On local: use node_modules
+              return `/node_modules/@mediapipe/hands/${file}`;
+            }
+          }
         });
 
         hands.setOptions({
