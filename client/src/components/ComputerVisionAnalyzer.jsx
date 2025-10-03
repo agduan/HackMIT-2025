@@ -1,4 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
+import { FaceMesh } from '@mediapipe/face_mesh';
+import { Pose } from '@mediapipe/pose';
+import { Hands } from '@mediapipe/hands';
 
 const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true }) => {
   const canvasRef = useRef(null);
@@ -30,38 +33,15 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
       try {
         console.log('Initializing MediaPipe models...');
         
-        // Dynamically load MediaPipe modules - use local in dev, CDN in production
-        let FaceMesh, Pose, Hands;
-        
-        if (import.meta.env.DEV) {
-          // Development: use local imports
-          const faceMeshModule = await import('@mediapipe/face_mesh');
-          const poseModule = await import('@mediapipe/pose');
-          const handsModule = await import('@mediapipe/hands');
-          FaceMesh = faceMeshModule.FaceMesh;
-          Pose = poseModule.Pose;
-          Hands = handsModule.Hands;
-        } else {
-          // Production: use CDN imports
-          const faceMeshModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
-          const poseModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
-          const handsModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
-          FaceMesh = faceMeshModule.FaceMesh;
-          Pose = poseModule.Pose;
-          Hands = handsModule.Hands;
-        }
-        
         // Initialize Face Mesh for eye tracking
         const isProd = import.meta.env.PROD;
         const faceMesh = new FaceMesh({
           locateFile: (file) => {
-            if (isProd) {
-              // On production: pull from CDN
-              return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-            } else {
-              // On local: use node_modules
-              return `/node_modules/@mediapipe/face_mesh/${file}`;
-            }
+            const url = isProd 
+              ? `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+              : `/node_modules/@mediapipe/face_mesh/${file}`;
+            console.log("Loading MediaPipe FaceMesh asset:", file, "->", url);
+            return url;
           }
         });
 
@@ -75,13 +55,11 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
         // Initialize Pose for body language
         const pose = new Pose({
           locateFile: (file) => {
-            if (isProd) {
-              // On production: pull from CDN
-              return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-            } else {
-              // On local: use node_modules
-              return `/node_modules/@mediapipe/pose/${file}`;
-            }
+            const url = isProd 
+              ? `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+              : `/node_modules/@mediapipe/pose/${file}`;
+            console.log("Loading MediaPipe Pose asset:", file, "->", url);
+            return url;
           }
         });
 
@@ -97,13 +75,11 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
         // Initialize Hands for gesture detection
         const hands = new Hands({
           locateFile: (file) => {
-            if (isProd) {
-              // On production: pull from CDN
-              return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            } else {
-              // On local: use node_modules
-              return `/node_modules/@mediapipe/hands/${file}`;
-            }
+            const url = isProd 
+              ? `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+              : `/node_modules/@mediapipe/hands/${file}`;
+            console.log("Loading MediaPipe Hands asset:", file, "->", url);
+            return url;
           }
         });
 
