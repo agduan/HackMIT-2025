@@ -9,6 +9,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@mediapipe/face_mesh": "^0.4.1633559619",
+    "@mediapipe/hands": "^0.4.1675469240",
+    "@mediapipe/pose": "^0.5.1675469404",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "socket.io-client": "^4.8.1"

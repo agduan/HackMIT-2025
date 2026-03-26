@@ -1,7 +1,4 @@
 import { useRef, useEffect, useState } from 'react';
-import { FaceMesh } from '@mediapipe/face_mesh';
-import { Pose } from '@mediapipe/pose';
-import { Hands } from '@mediapipe/hands';
 
 const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true }) => {
   const canvasRef = useRef(null);
@@ -33,9 +30,37 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
       try {
         console.log('Initializing MediaPipe models...');
         
+        // Dynamically load MediaPipe modules
+        let FaceMesh, Pose, Hands;
+        
+        if (import.meta.env.DEV) {
+          // Development: use local imports
+          const faceMeshModule = await import('@mediapipe/face_mesh');
+          const poseModule = await import('@mediapipe/pose');
+          const handsModule = await import('@mediapipe/hands');
+          FaceMesh = faceMeshModule.FaceMesh;
+          Pose = poseModule.Pose;
+          Hands = handsModule.Hands;
+        } else {
+          // Production: use CDN imports
+          const faceMeshModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
+          const poseModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
+          const handsModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
+          FaceMesh = faceMeshModule.FaceMesh;
+          Pose = poseModule.Pose;
+          Hands = handsModule.Hands;
+        }
+        
         // Initialize Face Mesh for eye tracking
+        const isProd = import.meta.env.PROD;
         const faceMesh = new FaceMesh({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+          locateFile: (file) => {
+            const url = isProd 
+              ? `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+              : `/node_modules/@mediapipe/face_mesh/${file}`;
+            console.log("Loading MediaPipe FaceMesh asset:", file, "->", url);
+            return url;
+          }
         });
 
         faceMesh.setOptions({
@@ -47,7 +72,13 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
         // Initialize Pose for body language
         const pose = new Pose({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+          locateFile: (file) => {
+            const url = isProd 
+              ? `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+              : `/node_modules/@mediapipe/pose/${file}`;
+            console.log("Loading MediaPipe Pose asset:", file, "->", url);
+            return url;
+          }
         });
 
         pose.setOptions({
@@ -61,7 +92,13 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
         // Initialize Hands for gesture detection
         const hands = new Hands({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+          locateFile: (file) => {
+            const url = isProd 
+              ? `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+              : `/node_modules/@mediapipe/hands/${file}`;
+            console.log("Loading MediaPipe Hands asset:", file, "->", url);
+            return url;
+          }
         });
 
         hands.setOptions({
@@ -73,25 +110,52 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
         // Set up face mesh results
         faceMesh.onResults((results) => {
+          console.log('FaceMesh results:', {
+            hasMultiFaceLandmarks: !!results.multiFaceLandmarks,
+            landmarkCount: results.multiFaceLandmarks?.length || 0,
+            hasImage: !!results.image,
+            imageSize: results.image ? `${results.image.width}x${results.image.height}` : 'none'
+          });
+          
           if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             console.log('Face detected, analyzing eye contact...');
             analyzeEyeContact(results.multiFaceLandmarks[0]);
+          } else {
+            console.log('No face landmarks detected');
           }
         });
 
         // Set up pose results
         pose.onResults((results) => {
+          console.log('Pose results:', {
+            hasPoseLandmarks: !!results.poseLandmarks,
+            landmarkCount: results.poseLandmarks?.length || 0,
+            hasImage: !!results.image,
+            imageSize: results.image ? `${results.image.width}x${results.image.height}` : 'none'
+          });
+          
           if (results.poseLandmarks) {
             console.log('Pose detected, analyzing body language...');
             analyzeBodyLanguage(results.poseLandmarks);
+          } else {
+            console.log('No pose landmarks detected');
           }
         });
 
         // Set up hands results
         hands.onResults((results) => {
+          console.log('Hands results:', {
+            hasMultiHandLandmarks: !!results.multiHandLandmarks,
+            landmarkCount: results.multiHandLandmarks?.length || 0,
+            hasImage: !!results.image,
+            imageSize: results.image ? `${results.image.width}x${results.image.height}` : 'none'
+          });
+          
           if (results.multiHandLandmarks) {
             console.log('Hands detected, analyzing gestures...');
             analyzeHandGestures(results.multiHandLandmarks);
+          } else {
+            console.log('No hand landmarks detected');
           }
         });
 
@@ -399,6 +463,13 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
     // Process with MediaPipe
     try {
+      console.log('Sending frame to MediaPipe:', {
+        canvasSize: `${canvas.width}x${canvas.height}`,
+        hasFaceMesh: !!faceMeshRef.current,
+        hasPose: !!poseRef.current,
+        hasHands: !!handsRef.current
+      });
+      
       if (faceMeshRef.current) {
         await faceMeshRef.current.send({ image: canvas });
       }
@@ -429,7 +500,7 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
 
   useEffect(() => {
     if (isInitialized && videoRef.current && isActive) {
-      const interval = setInterval(processFrame, 150); // Process every 150ms for more responsive updates
+      const interval = setInterval(processFrame, 100); // Process every 100ms for faster visual feedback
       return () => clearInterval(interval);
     }
   }, [isInitialized, isActive]);
