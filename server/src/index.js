@@ -13,7 +13,8 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 // Initialize Google Cloud Speech client
 const speechClient = new speech.SpeechClient({
-  keyFilename: "./fundamental-run-472018-j4-f9e30ffa6932.json",
+  //  keyFilename: "./fundamental-run-472018-j4-f9e30ffa6932.json",
+  apiKey: process.env.GOOGLE_API_KEY,
 });
 
 // --- Configuration for Live Feedback ---

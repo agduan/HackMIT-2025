@@ -6,20 +6,35 @@ const path = require("path");
  * @returns {string} The OpenAI API key
  */
 function getOpenAIApiKey() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (apiKey) return apiKey;
+
+  //fallback to local file if no key is available
   try {
     const keyFilePath = path.join(__dirname, "../../openai-key.txt");
-    const apiKey = fs.readFileSync(keyFilePath, "utf8").trim();
+    const fileKey = fs.readFileSync(keyFilePath, "utf8").trim();
+    if (fileKey && fileKey.startsWith("sk-")) return fileKey;
+  } catch (_) {}
 
-    if (!apiKey || !apiKey.startsWith("sk-")) {
-      throw new Error("Invalid OpenAI API key format");
-    }
-
-    return apiKey;
-  } catch (error) {
-    console.error("Error reading OpenAI API key:", error.message);
-    throw new Error("Failed to load OpenAI API key from openai-key.txt file");
-  }
+  throw new Error("OpenAI API key not found. Set OPENAI_API_KEY env var or create openai-key.txt");
 }
+
+// previous file-based implementation
+// function getOpenAIApiKey() {
+//   try {
+//     const keyFilePath = path.join(__dirname, "../../openai-key.txt");
+//     const apiKey = fs.readFileSync(keyFilePath, "utf8").trim();
+//
+//     if (!apiKey || !apiKey.startsWith("sk-")) {
+//       throw new Error("Invalid OpenAI API key format");
+//     }
+//
+//     return apiKey;
+//   } catch (error) {
+//     console.error("Error reading OpenAI API key:", error.message);
+//     throw new Error("Failed to load OpenAI API key from openai-key.txt file");
+//   }
+// }
 
 module.exports = {
   getOpenAIApiKey,
