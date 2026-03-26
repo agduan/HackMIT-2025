@@ -42,13 +42,21 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
           Pose = poseModule.Pose;
           Hands = handsModule.Hands;
         } else {
-          // Production: use CDN imports
-          const faceMeshModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
-          const poseModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
-          const handsModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
-          FaceMesh = faceMeshModule.FaceMesh;
-          Pose = poseModule.Pose;
-          Hands = handsModule.Hands;
+          // Production: load UMD bundles via script tags, then read from window
+          const loadScript = (src) => new Promise((resolve, reject) => {
+            if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+          await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
+          await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
+          await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
+          FaceMesh = window.FaceMesh;
+          Pose = window.Pose;
+          Hands = window.Hands;
         }
         
         // Initialize Face Mesh for eye tracking
@@ -496,7 +504,7 @@ const ComputerVisionAnalyzer = ({ videoRef, onAnalysisUpdate, isActive = true })
       eyeContact: eyeContactData,
       bodyLanguage: bodyLanguageData
     });
-  }, [eyeContactData, bodyLanguageData, onAnalysisUpdate]);
+  }, [eyeContactData, bodyLanguageData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (isInitialized && videoRef.current && isActive) {
